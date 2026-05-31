@@ -1,5 +1,5 @@
 from typing import Any
-from .model import DroneNetwork, Hub
+from .model import DroneNetwork, Hub, Connection
 
 
 class Parsers:
@@ -8,13 +8,18 @@ class Parsers:
         self.raw_data: dict[str, Any] = {}
         self.hubs: dict[str, Hub] = {}
         self.connections: dict[str, set[str]] = {}
+        self.raw_connections: list[Connection] = []
 
     def read_line(self) -> DroneNetwork:
         with open(self.path) as file:
             for line in file:
                 self.parse_line(line)
         self.raw_data.update(
-            {"hubs": self.hubs, "connections": self.connections}
+            {
+                "hubs": self.hubs,
+                "connections": self.connections,
+                "raw_connection": self.raw_connections,
+            }
         )
         return DroneNetwork.model_validate(self.raw_data)
 
@@ -37,15 +42,29 @@ class Parsers:
         args = line.split(" ", 2)
         connection = args[1].split("-")
 
-        if len(connection) != 2:
+        if len(connection) < 2:
             raise ValueError("Invalid connection value")
 
         hub1, hub2 = [i.strip() for i in connection]
         for hub in connection:
             if hub not in self.connections:
                 self.connections[hub.strip()] = set()
-        self.connections[hub1].add(hub2)
-        self.connections[hub2].add(hub1)
+
+        max_link_capacity = 1
+        if len(args) == 3:
+            if args[2].startswith("[") and args[2].endswith("]"):
+                key, value = args[2].strip()[1:-1].split("=", 1)
+                if key == "max_link_capacity":
+                    max_link_capacity = int(value)
+                else:
+                    raise ValueError("Invalid metadata")
+
+        self.add_connections(hub1, hub2)
+        self.raw_connections.append(
+            Connection(
+                hub1=hub1, hub2=hub2, max_link_capacity=max_link_capacity
+            )
+        )
 
     def add_connections(self, hub1: str, hub2: str) -> None:
         self.connections[hub1].add(hub2)

@@ -19,11 +19,15 @@ class Metadata(BaseModel):
 
     @model_validator(mode="after")
     def color_validator(self) -> Self:
+        if self.color is None:
+            return self
         if (
             self.color.lower() != "none"
             and self.color.lower() not in THECOLORS.keys()
         ):
             raise ValueError("Invalid color arguments: " + self.color)
+        if self.color.lower() == "none":
+            self.color = "black"
         return self
 
 

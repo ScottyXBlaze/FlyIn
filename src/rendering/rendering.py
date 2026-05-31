@@ -1,6 +1,6 @@
 import pygame
 
-from .model import Drone
+from .model import HubSprite, ConnectionSprite
 
 from ..parsers.model import DroneNetwork
 
@@ -30,14 +30,21 @@ class Renderer:
 
         # Sprite groups
         self.all_sprite = AllSprite()
-        self.all_sprite.add(Drone())
 
         self.running = True
+        self.load_drones()
+        self.load_connections()
 
     def load_drones(self) -> None:
-        for hub_name, hub in self.drone_network.hubs.items():
-            print(hub_name)
-            self.all_sprite.add()
+        for _, hub in self.drone_network.hubs.items():
+            self.all_sprite.add(HubSprite((hub.x, hub.y), hub.metadata.color))
+
+    def load_connections(self) -> None:
+        for connection in self.drone_network.raw_connection:
+            hub1 = self.drone_network.hubs.get(connection.hub1)
+            hub2 = self.drone_network.hubs.get(connection.hub2)
+            if hub1 is not None and hub2 is not None:
+                self.all_sprite.add(ConnectionSprite(hub1, hub2, connection))
 
     def check_event(self) -> None:
         for event in pygame.event.get():
@@ -64,16 +71,19 @@ class Renderer:
 
     def run(self):
         while self.running:
+            self.clock.tick(60)
             self.check_event()
             self.get_input()
-            self.screen.fill("white")
-            self.clock.tick(60)
-            pygame.draw.circle(self.screen, "blue", (20, 20), 10)
+            self.screen.fill("lightgray")
             self.all_sprite.draw((self.camera_x, self.camera_y))
             self.camera_text = self.font.render(
                 f"Camera X: {self.camera_x} | Camera Y: {self.camera_y}",
                 True,
-                "red",
+                "darkblue",
+            )
+            self.fps_text = self.font.render(
+                f"FPS {int(self.clock.get_fps())}", True, "darkblue"
             )
             self.screen.blit(self.camera_text, (10, 10))
+            self.screen.blit(self.fps_text, (WINDOWWIDTH - 60, 10))
             pygame.display.update()

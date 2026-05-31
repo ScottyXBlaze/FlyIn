@@ -21,13 +21,16 @@ class AllSprite(pygame.sprite.Group):
         self.offset.y = -(target_pos[1] - WINDOWHEIGHT / 2)
 
         self.hub_layout = [
-            sprite for sprite in self if not hasattr(sprite, "hub")
+            sprite for sprite in self if not hasattr(sprite, "connection")
+        ]
+        self.connection_layout = [
+            sprite for sprite in self if hasattr(sprite, "connection")
         ]
 
         if self.display_surface is None:
             sys.exit(1)
 
-        for layout in [self.hub_layout]:
+        for layout in [self.connection_layout, self.hub_layout]:
             for sprite in sorted(
                 layout, key=lambda sprite: sprite.rect.centery
             ):
