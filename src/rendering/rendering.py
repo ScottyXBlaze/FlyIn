@@ -63,6 +63,7 @@ class Renderer:
         image_path_ui_fps = os.path.join(base_dir, "assets", "BackUI.png")
         image_path_ui_pos = os.path.join(base_dir, "assets", "BackPos.png")
         image_path_ui_inf = os.path.join(base_dir, "assets", "BackInfo.png")
+        image_path_main = os.path.join(base_dir, "assets", "BackMain.png")
         try:
             sheet = pygame.image.load(image_path_drone).convert_alpha()
             self.assets["drone"] = sheet
@@ -75,6 +76,8 @@ class Renderer:
             self.assets["ui_pos"] = sheet
             sheet = pygame.image.load(image_path_ui_inf).convert_alpha()
             self.assets["ui_inf"] = sheet
+            sheet = pygame.image.load(image_path_main).convert_alpha()
+            self.assets["ui_main"] = sheet
         except pygame.error as e:
             print(f"Error: {e}")
 
@@ -194,7 +197,7 @@ class Renderer:
             dt = self.clock.tick(60) / 1000
             self.check_event()
             self.get_input(dt)
-            self.screen.fill("lightgray")
+            self.screen.blit(self.assets["ui_main"])
             self.all_sprite.draw_sprite((self.camera_x, self.camera_y))
             self.camera_text = self.font.render(
                 f" X: {self.camera_x:.1f} |"
