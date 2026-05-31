@@ -34,17 +34,18 @@ class Parsers:
             self.parse_connection(line)
 
     def parse_connection(self, line: str) -> None:
-        args = line.split(" ", 1)
-        connection = args[1].split("-", 1)
+        args = line.split(" ", 2)
+        connection = args[1].split("-")
 
         if len(connection) != 2:
             raise ValueError("Invalid connection value")
 
+        hub1, hub2 = [i.strip() for i in connection]
         for hub in connection:
             if hub not in self.connections:
                 self.connections[hub.strip()] = set()
-
-        self.add_connections(connection[0].strip(), connection[1].strip())
+        self.connections[hub1].add(hub2)
+        self.connections[hub2].add(hub1)
 
     def add_connections(self, hub1: str, hub2: str) -> None:
         self.connections[hub1].add(hub2)
@@ -64,13 +65,24 @@ class Parsers:
             "y": y,
         }
         if len(args) == 5:
-            raw_metadata = self.parse_metadata(args[4])
+            raw_metadata = self.parse_metadata_hub(args[4])
             hub_data["metadata"] = raw_metadata
 
         self.hubs.update({name: Hub.model_validate(hub_data)})
 
     @staticmethod
-    def parse_metadata(metadata: str) -> dict[str, str]:
+    def parse_metadata_connection(metadata: str) -> dict[str, str]:
+        config = {}
+        args = metadata[1:-1]
+        name, value = args.split("=")
+        if name != "max_link_capacity":
+            raise ValueError("Invalid metadata")
+        else:
+            config[name] = value
+        return config
+
+    @staticmethod
+    def parse_metadata_hub(metadata: str) -> dict[str, str]:
         config = {}
         args = metadata[1:-1]
         for arg in args.split(" "):
