@@ -5,7 +5,7 @@ import pygame
 WINDOWWIDTH, WINDOWHEIGHT = 800, 600
 
 
-class AllSprite(pygame.sprite.Group):
+class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
     def __init__(self) -> None:
         super().__init__()
         self.display_surface = pygame.display.get_surface()
@@ -35,8 +35,16 @@ class AllSprite(pygame.sprite.Group):
 
         for layout in [self.connection_layout, self.hub_layout]:
             for sprite in sorted(
-                layout, key=lambda sprite: sprite.rect.centery
+                layout,
+                key=lambda sprite: (
+                    sprite.rect.centery
+                    if isinstance(sprite.rect, pygame.Rect | pygame.FRect)
+                    else (0, 0)
+                ),
             ):
-                self.display_surface.blit(
-                    sprite.image, sprite.rect.topleft + self.offset
-                )
+                if isinstance(
+                    sprite.rect, pygame.Rect | pygame.FRect
+                ) and isinstance(sprite.image, pygame.Surface):
+                    self.display_surface.blit(
+                        sprite.image, sprite.rect.topleft + self.offset
+                    )

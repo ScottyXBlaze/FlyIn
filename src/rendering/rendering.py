@@ -21,8 +21,8 @@ class Renderer:
         pygame.display.set_caption("FlyIn - Drone Simulator")
 
         # Camera
-        self.camera_x = 0
-        self.camera_y = 0
+        self.camera_x: int = 0
+        self.camera_y: int = 0
         self.draging: bool = False
         self.last_mouse_pos: tuple[int, int] = (0, 0)
 
@@ -46,7 +46,9 @@ class Renderer:
 
     def load_drones(self) -> None:
         for _, hub in self.drone_network.hubs.items():
-            self.all_sprite.add(HubSprite((hub.x, hub.y), hub.metadata.color))
+            self.all_sprite.add(
+                HubSprite((hub.x, hub.y), hub.metadata.color, hub.name)
+            )
 
     def load_connections(self) -> None:
         for connection in self.drone_network.raw_connection:
@@ -60,6 +62,7 @@ class Renderer:
         image_path_drone = os.path.join(base_dir, "assets", "drone.png")
         image_path_ui_fps = os.path.join(base_dir, "assets", "BackUI.png")
         image_path_ui_pos = os.path.join(base_dir, "assets", "BackPos.png")
+        image_path_ui_inf = os.path.join(base_dir, "assets", "BackInfo.png")
         try:
             sheet = pygame.image.load(image_path_drone).convert_alpha()
             self.assets["drone"] = sheet
@@ -70,6 +73,8 @@ class Renderer:
                 pygame.image.load(image_path_ui_pos).convert_alpha()
             )
             self.assets["ui_pos"] = sheet
+            sheet = pygame.image.load(image_path_ui_inf).convert_alpha()
+            self.assets["ui_inf"] = sheet
         except pygame.error as e:
             print(f"Error: {e}")
 
@@ -109,11 +114,80 @@ class Renderer:
 
     def get_input(self, delta: float) -> None:
         keys = pygame.key.get_pressed()
-        self.camera_x += 200 * delta * (keys[pygame.K_d] - keys[pygame.K_a])
-        self.camera_y += 200 * delta * (keys[pygame.K_s] - keys[pygame.K_w])
+        self.camera_x += int(
+            200 * delta * (keys[pygame.K_d] - keys[pygame.K_a])
+        )
+        self.camera_y += int(
+            200 * delta * (keys[pygame.K_s] - keys[pygame.K_w])
+        )
 
         if keys[pygame.K_q]:
             self.running = False
+
+    def check_for_ui(self) -> None:
+        hub = self.check_over_pos()
+        if hub is not None:
+            self.draw_hub_tooltip(hub, pygame.mouse.get_pos())
+
+    def draw_hub_tooltip(self, hub: str, mouse_pos: tuple[int, int]) -> None:
+        """
+        Dessine une boîte d'information à la position de la souris écran.
+        """
+        real_hub = self.drone_network.hubs.get(hub)
+        if not real_hub:
+            return
+        lines = [
+            f"Name: {real_hub.name}",
+            f"Pos: x={real_hub.x}  y={real_hub.y}",
+            f"ZoneType: {real_hub.metadata.zone.name}",
+            f"Color: {real_hub.metadata.color}",
+            f"MaxDrone: {real_hub.metadata.max_drones}",
+        ]
+
+        padding = 10
+        line_spacing = 5
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        fonts = os.path.join(base_dir, "assets", "Oxanium-Bold.ttf")
+        font = pygame.font.Font(fonts, 19)
+
+        text_surfaces = [font.render(line, True, (0, 0, 0)) for line in lines]
+        max_w = max(surf.get_width() for surf in text_surfaces) + (padding * 2)
+        total_h = (
+            sum(surf.get_height() for surf in text_surfaces)
+            + (line_spacing * (len(lines) - 1))
+            + (padding * 2)
+        )
+
+        tooltip_x = mouse_pos[0] + 15
+        tooltip_y = mouse_pos[1] + 15
+
+        if tooltip_x + max_w > self.screen.get_width():
+            tooltip_x = mouse_pos[0] - max_w - 5
+        if tooltip_y + total_h > self.screen.get_height():
+            tooltip_y = mouse_pos[1] - total_h - 5
+
+        resized_bg = pygame.transform.scale(
+            self.assets["ui_inf"], (max_w, total_h)
+        )
+        current_y = padding
+        for surf in text_surfaces:
+            resized_bg.blit(surf, (padding, current_y))
+            current_y += surf.get_height() + line_spacing
+
+        self.screen.blit(resized_bg, (tooltip_x, tooltip_y))
+
+    def check_over_pos(self) -> str | None:
+        mouse_pos = pygame.mouse.get_pos()
+        center_x = self.screen.get_width() // 2
+        center_y = self.screen.get_height() // 2
+
+        mouse_world_x = mouse_pos[0] - center_x + self.camera_x
+        mouse_world_y = mouse_pos[1] - center_y + self.camera_y
+        for hub in self.all_sprite.sprites():
+            if isinstance(hub, HubSprite):
+                if hub.is_hovered((mouse_world_x, mouse_world_y)):
+                    return hub.name
+        return None
 
     def run(self) -> None:
         while self.running:
@@ -135,4 +209,6 @@ class Renderer:
             self.screen.blit(self.assets["ui_pos"], (0, 0))
             self.screen.blit(self.camera_text, (2, 9))
             self.screen.blit(self.fps_text, (WINDOWWIDTH - 78, 9))
+            self.check_for_ui()
+            self.all_sprite.update()
             pygame.display.update()

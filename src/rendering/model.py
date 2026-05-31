@@ -4,8 +4,14 @@ from ..parsers.model import Connection, Hub
 
 
 class HubSprite(pygame.sprite.Sprite):
-    def __init__(self, pos: tuple[int, int], color: str) -> None:
+    def __init__(
+        self,
+        pos: tuple[int, int],
+        color: str,
+        name: str,
+    ) -> None:
         super().__init__()
+        self.name = name
         self.pos: tuple[int, int] = self.transform_pos(pos)
         self.image = pygame.Surface((30, 30))
         self.rect = self.image.get_frect(topleft=self.pos)
@@ -14,6 +20,15 @@ class HubSprite(pygame.sprite.Sprite):
     @staticmethod
     def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
         return pos[0] * 50, pos[1] * 50
+
+    def is_hovered(self, mouse_world: tuple[int, int]) -> bool:
+        world_x = self.pos[0]
+        world_y = self.pos[1]
+
+        world_rect = pygame.Rect(0, 0, 30, 30)
+        world_rect.topleft = (world_x, world_y)
+
+        return world_rect.collidepoint(mouse_world)
 
 
 class ConnectionSprite(pygame.sprite.Sprite):

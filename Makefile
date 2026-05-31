@@ -18,5 +18,5 @@ lint:
 	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude=.venv
 
 lint-strict:
-	poetry run flake8 .
-	poetry run mypy --strict .
+	flake8 . --exclude=.venv
+	mypy --strict . --exclude=.venv
