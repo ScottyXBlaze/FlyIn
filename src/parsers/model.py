@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Self
 
 from pygame.color import THECOLORS
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class ZoneType(str, Enum):

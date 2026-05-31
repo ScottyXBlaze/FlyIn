@@ -6,17 +6,20 @@ WINDOWWIDTH, WINDOWHEIGHT = 800, 600
 
 
 class AllSprite(pygame.sprite.Group):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.display_surface = pygame.display.get_surface()
         self.offset = pygame.Vector2()
-        if self.display_surface is None:
-            sys.exit(1)
 
     def draw(
         self,
-        target_pos,
-    ):
+        surface: pygame.Surface,
+        bgd: pygame.Surface | None = None,
+        special_flags: int = 0,
+    ) -> list[pygame.FRect | pygame.Rect]:
+        return super().draw(surface, bgd, special_flags)
+
+    def draw_sprite(self, target_pos: tuple[int | float, int | float]) -> None:
         self.offset.x = -(target_pos[0] - WINDOWWIDTH / 2)
         self.offset.y = -(target_pos[1] - WINDOWHEIGHT / 2)
 

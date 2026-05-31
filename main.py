@@ -3,7 +3,7 @@ from src import Parsers, Hub, DroneNetwork, Metadata, ModelPrinter, Renderer
 
 class Main:
     def __init__(self) -> None:
-        self.parsers = Parsers("maps/easy/02_simple_fork.txt")
+        self.parsers = Parsers("maps/challenger/01_the_impossible_dream.txt")
         self.network = self.parsers.read_line()
         self.renderer = Renderer(self.network)
 

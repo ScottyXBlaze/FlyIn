@@ -21,5 +21,5 @@ class ModelPrinter:
         print(f"End Hub: {drone_network.end_hub}")
         for _, hub in drone_network.hubs.items():
             self.print_hub(hub)
-        for hub, connection in drone_network.connections.items():
-            print(f"Connection: {hub} --> {connection}")
+        for hub_name, connection in drone_network.connections.items():
+            print(f"Connection: {hub_name} --> {connection}")

@@ -1,5 +1,3 @@
-import random
-
 import pygame
 
 from ..parsers.model import Connection, Hub
