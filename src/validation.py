@@ -1,21 +1,20 @@
+"""Module that contain a validation utilities."""
+
 import importlib
 
 
 class Validation:
-    """
-    Validation function.
-    Returns:
-        None
-    """
+    """Validation function."""
 
     @staticmethod
     def check_dependencies(dependencies: set[str]) -> bool:
         """
-        check function.
+        Check if everything in the parameter is installed.
+
         Args:
-            dependencies (set[str]): Check Dependencies dynamicaly to .
+            dependencies (set[str]): Dependency list.
         Returns:
-            bool: Description of return value.
+            bool: True if everything is installed.
         """
         for dependency in dependencies:
             try:

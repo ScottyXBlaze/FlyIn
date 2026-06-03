@@ -1,10 +1,19 @@
+"""Module that contain the parser of the program."""
+
 from typing import Any
 from .model import DroneNetwork, Hub, Connection
-import os
 
 
 class Parsers:
+    """Parsers class."""
+
     def __init__(self, path: str) -> None:
+        """
+        Everything starts here.
+
+        Args:
+            path (str): The path of the file.
+        """
         self.path = path
         self.raw_data: dict[str, Any] = {}
         self.hubs: dict[str, Hub] = {}
@@ -12,6 +21,13 @@ class Parsers:
         self.raw_connections: list[Connection] = []
 
     def read_line(self) -> DroneNetwork:
+        """
+        Read the file and return the parsed file.
+
+        Returns:
+            DroneNetwork: The class that contain every information
+            of the drone network.
+        """
         with open(self.path) as file:
             for line in file:
                 self.parse_line(line)
@@ -25,6 +41,12 @@ class Parsers:
         return DroneNetwork.model_validate(self.raw_data)
 
     def parse_line(self, line: str) -> None:
+        """
+        Parse each line.
+
+        Args:
+            line (str): The line to parse.
+        """
         args = line.split(" ")
         if args[0].strip() == "nb_drones:":
             self.raw_data[args[0][:-1]] = args[1]
@@ -40,6 +62,12 @@ class Parsers:
             self.parse_connection(line)
 
     def parse_connection(self, line: str) -> None:
+        """
+        Parse the connection.
+
+        Args:
+            line (str): The line to parse.
+        """
         args = line.split(" ", 2)
         connection = args[1].split("-")
 
@@ -68,10 +96,23 @@ class Parsers:
         )
 
     def add_connections(self, hub1: str, hub2: str) -> None:
+        """
+        Add two hubs in the connection.
+
+        Args:
+            hub1 (str): Description of hub1.
+            hub2 (str): Description of hub2.
+        """
         self.connections[hub1].add(hub2)
         self.connections[hub2].add(hub1)
 
     def parse_hub(self, line: str) -> None:
+        """
+        Parse the hub.
+
+        Args:
+            line (str): The line to parse.
+        """
         args = line.strip().split(" ", 4)
         if len(args) < 4:
             raise ValueError(f"Invalid hub {line}")
@@ -92,6 +133,14 @@ class Parsers:
 
     @staticmethod
     def parse_metadata_connection(metadata: str) -> dict[str, str]:
+        """
+        Parse the metadata for the connection.
+
+        Args:
+            metadata (str): The string to parse.
+        Returns:
+            dict: The dictionnary that contain the parsed metadata.
+        """
         config = {}
         args = metadata[1:-1]
         name, value = args.split("=")
@@ -103,6 +152,14 @@ class Parsers:
 
     @staticmethod
     def parse_metadata_hub(metadata: str) -> dict[str, str]:
+        """
+        Parse the metadata for the hub.
+
+        Args:
+            metadata (str): The string to parse.
+        Returns:
+            dict: The dictionnary that contain the parsed metadata.
+        """
         config = {}
         args = metadata[1:-1]
         for arg in args.split(" "):

@@ -6,7 +6,7 @@ authors = ["nyramana <nyramana@student.42antananarivo.mg>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python3 = "^3.12"
 pygame-ce = "^2.5.7"
 pydantic = "^2.13.4"
 
@@ -17,9 +17,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 strict = true
-plugins = [
-    "pydantic.mypy"
-]
+plugins = ["pydantic.mypy"]
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

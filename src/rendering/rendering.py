@@ -1,3 +1,5 @@
+"""Module that contain the main rendering class."""
+
 import pygame
 import os
 import sys
@@ -49,17 +51,19 @@ class Renderer:
 
         self.running = True
 
-        self.load_drones()
+        self.load_hubs()
         self.load_connections()
         self.load_assets()
 
-    def load_drones(self) -> None:
+    def load_hubs(self) -> None:
+        """Load every hub sprite."""
         for _, hub in self.drone_network.hubs.items():
             self.all_sprite.add(
                 HubSprite((hub.x, hub.y), hub.metadata.color, hub.name)
             )
 
     def load_connections(self) -> None:
+        """Load every connection sprite."""
         for connection in self.drone_network.raw_connection:
             hub1 = self.drone_network.hubs.get(connection.hub1)
             hub2 = self.drone_network.hubs.get(connection.hub2)
@@ -67,6 +71,7 @@ class Renderer:
                 self.all_sprite.add(ConnectionSprite(hub1, hub2, connection))
 
     def load_assets(self) -> None:
+        """Load every assets."""
         base_dir = os.path.dirname(os.path.abspath(__file__))
         image_file = {
             "drone": "drone.png",
@@ -88,12 +93,14 @@ class Renderer:
         )
 
     def handle_camera(self) -> None:
+        """Handle the camera to not go too far."""
         self.camera_x = min(self.bound[0], self.camera_x)
         self.camera_x = max(self.bound[2], self.camera_x)
         self.camera_y = min(self.bound[1], self.camera_y)
         self.camera_y = max(self.bound[3], self.camera_y)
 
     def check_bound(self, hubs: dict[str, Hub]) -> list[int]:
+        """Check the limits of the scree based on hubs coordinates."""
         maximum_x = max(hubs.values(), key=lambda x: x.x).x * 50 - 200
         maximum_y = max(hubs.values(), key=lambda x: x.y).y * 50 - 300
         minimum_x = min(hubs.values(), key=lambda x: x.x).x * 50 + 200
@@ -101,6 +108,7 @@ class Renderer:
         return [maximum_x, maximum_y, minimum_x, minimum_y]
 
     def check_event(self) -> None:
+        """Check some event."""
         self.handle_camera()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -122,6 +130,12 @@ class Renderer:
                     self.last_mouse_pos = event.pos
 
     def get_input(self, delta: float) -> None:
+        """
+        Get the input from the user.
+
+        Args:
+            delta (float): Delta time.
+        """
         keys = pygame.key.get_pressed()
         self.camera_x += int(
             200 * delta * (keys[pygame.K_d] - keys[pygame.K_a])
@@ -134,13 +148,18 @@ class Renderer:
             self.running = False
 
     def check_for_ui(self) -> None:
+        """Check if we need to show the UI or not."""
         hub = self.check_over_pos()
         if hub is not None:
             self.draw_hub_tooltip(hub, pygame.mouse.get_pos())
 
     def draw_hub_tooltip(self, hub: str, mouse_pos: tuple[int, int]) -> None:
         """
-        Dessine une boîte d'information à la position de la souris écran.
+        Draw a tooltip for a hub.
+
+        Args:
+            hub (str): The hub we want to show.
+            mouse_pos (tuple[int, int]): The position of the mouse.
         """
         real_hub = self.drone_network.hubs.get(hub)
         if not real_hub:
@@ -186,6 +205,12 @@ class Renderer:
         self.screen.blit(resized_bg, (tooltip_x, tooltip_y))
 
     def check_over_pos(self) -> str | None:
+        """
+        Check if the mouse is over a hub.
+
+        Returns:
+            str: the name of the hub or None.
+        """
         mouse_pos = pygame.mouse.get_pos()
         center_x = self.screen.get_width() // 2
         center_y = self.screen.get_height() // 2
@@ -199,6 +224,7 @@ class Renderer:
         return None
 
     def run(self) -> None:
+        """Run the rendering."""
         while self.running:
             dt = self.clock.tick(60) / 1000
             self.check_event()

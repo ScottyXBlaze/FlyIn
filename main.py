@@ -1,8 +1,13 @@
+"""Main file."""
+
 from src import Parsers, Renderer
 
 
 class Main:
+    """Main function."""
+
     def __init__(self) -> None:
+        """Everything starts here."""
         self.parsers = Parsers("maps/challenger/01_the_impossible_dream.txt")
         # self.parsers = Parsers("maps/easy/01_linear_path.txt")
         # self.parsers = Parsers("maps/easy/02_simple_fork.txt")
@@ -17,6 +22,7 @@ class Main:
         self.renderer = Renderer(self.network)
 
     def run(self) -> None:
+        """Run the entire program."""
         self.renderer.run()
 
 

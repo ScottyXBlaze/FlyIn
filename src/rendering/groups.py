@@ -1,3 +1,5 @@
+"""Module that contain the class to easily have a camera."""
+
 import sys
 
 import pygame
@@ -6,20 +8,22 @@ from .settings import WINDOWWIDTH, WINDOWHEIGHT
 
 
 class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
+    """Sprite Group for every sprite."""
+
     def __init__(self) -> None:
+        """Everything starts here."""
         super().__init__()
         self.display_surface = pygame.display.get_surface()
         self.offset = pygame.Vector2()
 
-    def draw(
-        self,
-        surface: pygame.Surface,
-        bgd: pygame.Surface | None = None,
-        special_flags: int = 0,
-    ) -> list[pygame.FRect | pygame.Rect]:
-        return super().draw(surface, bgd, special_flags)
-
     def draw_sprite(self, target_pos: tuple[int | float, int | float]) -> None:
+        """
+        Draw every sprite in the screen.
+
+        Args:
+            target_pos (tuple[int, int]): The position of
+            where to draw every sprite.
+        """
         self.offset.x = -(target_pos[0] - WINDOWWIDTH / 2)
         self.offset.y = -(target_pos[1] - WINDOWHEIGHT / 2)
 

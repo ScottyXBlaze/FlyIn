@@ -1,1 +1,3 @@
-WINDOWWIDTH, WINDOWHEIGHT = 1400, 1000
+"""Module that contain some static variable."""
+
+WINDOWWIDTH, WINDOWHEIGHT = 1900, 1000
