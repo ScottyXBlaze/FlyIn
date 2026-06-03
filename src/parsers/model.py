@@ -66,11 +66,9 @@ class DroneNetwork(BaseModel):
     )
     connections: dict[str, set[str]] = Field(default_factory=dict)
 
-    @property
     def get_start_hub(self) -> Hub:
         return self.hubs[self.start_hub]
 
-    @property
     def get_end_hub(self) -> Hub:
         return self.hubs[self.end_hub]
 

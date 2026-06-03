@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-WINDOWWIDTH, WINDOWHEIGHT = 800, 600
+from .settings import WINDOWWIDTH, WINDOWHEIGHT
 
 
 class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):

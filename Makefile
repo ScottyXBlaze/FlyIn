@@ -1,21 +1,26 @@
+UV=uv
+DEPENDENCY_FILE=requirements.txt
 NAME=FLY_IN
 
 install:
-	poetry install
+	$(UV) pip install -r $(DEPENDENCY_FILE)
 
 run:
-	poetry run python3 main.py
+	$(UV) run python3 main.py
 
 debug:
 	echo "Debugging"
-	poetry run pydb main.py
+	$(UV) run pydb main.py
 
 clean:
-	echo "cleanning"
+	@echo "cleanning"
+	@find . -type d -name "__pycache__" -exec rm -rf {} +
+	@find . -type d -name ".mypy_cache" -exec rm -rf {} +
+	@echo "Project cleaned"
 
 lint:
-	flake8 . --exclude=.venv
-	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude=.venv
+	$(UV) run python3 -m flake8 . --exclude=.venv
+	$(UV) run python3 -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --exclude=.venv
 
 lint-strict:
 	flake8 . --exclude=.venv

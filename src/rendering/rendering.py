@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 
 from .model import HubSprite, ConnectionSprite
 
@@ -9,11 +10,19 @@ from .groups import AllSprite
 
 from typing import Any
 
-WINDOWWIDTH, WINDOWHEIGHT = 800, 600
+from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
 
 class Renderer:
+    """Rendering class for the FlyIn Project."""
+
     def __init__(self, drone_network: DroneNetwork) -> None:
+        """
+        Everything starts here.
+
+        Args:
+            drone_network (DroneNetwork): The main class of the project.
+        """
         # Common
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -59,27 +68,24 @@ class Renderer:
 
     def load_assets(self) -> None:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path_drone = os.path.join(base_dir, "assets", "drone.png")
-        image_path_ui_fps = os.path.join(base_dir, "assets", "BackUI.png")
-        image_path_ui_pos = os.path.join(base_dir, "assets", "BackPos.png")
-        image_path_ui_inf = os.path.join(base_dir, "assets", "BackInfo.png")
-        image_path_main = os.path.join(base_dir, "assets", "BackMain.png")
-        try:
-            sheet = pygame.image.load(image_path_drone).convert_alpha()
-            self.assets["drone"] = sheet
-            sheet = pygame.image.load(image_path_ui_fps).convert_alpha()
-            sheet = pygame.transform.scale(sheet, (32 * 3, 32))
-            self.assets["ui"] = sheet
-            sheet = pygame.transform.scale2x(
-                pygame.image.load(image_path_ui_pos).convert_alpha()
-            )
-            self.assets["ui_pos"] = sheet
-            sheet = pygame.image.load(image_path_ui_inf).convert_alpha()
-            self.assets["ui_inf"] = sheet
-            sheet = pygame.image.load(image_path_main).convert_alpha()
-            self.assets["ui_main"] = sheet
-        except pygame.error as e:
-            print(f"Error: {e}")
+        image_file = {
+            "drone": "drone.png",
+            "ui": "BackUI.png",
+            "ui_pos": "BackPos.png",
+            "ui_inf": "BackInfo.png",
+            "ui_main": "BackMain.png",
+        }
+        for name, path in image_file.items():
+            try:
+                path = os.path.join(base_dir, "assets", path)
+                self.assets[name] = pygame.image.load(path)
+            except pygame.error as e:
+                print(e)
+                sys.exit()
+
+        self.assets["ui_main"] = pygame.transform.scale(
+            self.assets["ui_main"], self.screen.get_size()
+        )
 
     def handle_camera(self) -> None:
         self.camera_x = min(self.bound[0], self.camera_x)
