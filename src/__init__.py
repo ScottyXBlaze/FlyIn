@@ -1,6 +1,7 @@
 """Package that countain every code for the program."""
 
-from .parsers import Parsers, Hub, DroneNetwork, Metadata, ModelPrinter
+from .model import Connection, DroneNetwork, Hub, Metadata
+from .parsers import ModelPrinter, Parsers
 from .rendering import Renderer
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "Metadata",
     "ModelPrinter",
     "Renderer",
+    "Connection",
 ]

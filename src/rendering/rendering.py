@@ -1,19 +1,15 @@
 """Module that contain the main rendering class."""
 
-import pygame
 import os
 import sys
 
+import pygame
+
 from src.rendering.camera import Camera
 
-from .model import HubSprite, ConnectionSprite
-
-from ..parsers.model import DroneNetwork, Hub
-
+from .. import DroneNetwork, Hub
 from .groups import AllSprite
-
-from typing import Any
-
+from .model import ConnectionSprite, HubSprite, InfoSprite
 from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
 
@@ -45,9 +41,14 @@ class Renderer:
 
         # Sprite groups
         self.all_sprite = AllSprite()
+        self.ui_sprite: pygame.sprite.Group[pygame.sprite.Sprite] = (
+            pygame.sprite.Group()
+        )
 
         # Assets
         self.assets: dict[str, pygame.Surface] = {}
+        self.ui_info = InfoSprite("BackUI.png", self.drone_network)
+        self.ui_sprite.add(self.ui_info)
 
         self.running = True
 
@@ -155,58 +156,7 @@ class Renderer:
         """Check if we need to show the UI or not."""
         hub = self.check_over_pos()
         if hub is not None:
-            self.draw_hub_tooltip(hub, pygame.mouse.get_pos())
-
-    def draw_hub_tooltip(self, hub: str, mouse_pos: tuple[int, int]) -> None:
-        """
-        Draw a tooltip for a hub.
-
-        Args:
-            hub (str): The hub we want to show.
-            mouse_pos (tuple[int, int]): The position of the mouse.
-        """
-        real_hub = self.drone_network.hubs.get(hub)
-        if not real_hub:
-            return
-        lines = [
-            f"Name: {real_hub.name}",
-            f"Pos: x={real_hub.x}  y={real_hub.y}",
-            f"ZoneType: {real_hub.metadata.zone.name}",
-            f"Color: {real_hub.metadata.color}",
-            f"MaxDrone: {real_hub.metadata.max_drones}",
-        ]
-
-        padding = 10
-        line_spacing = 5
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        fonts = os.path.join(base_dir, "assets", "Oxanium-Bold.ttf")
-        font = pygame.font.Font(fonts, 19)
-
-        text_surfaces = [font.render(line, True, (0, 0, 0)) for line in lines]
-        max_w = max(surf.get_width() for surf in text_surfaces) + (padding * 2)
-        total_h = (
-            sum(surf.get_height() for surf in text_surfaces)
-            + (line_spacing * (len(lines) - 1))
-            + (padding * 2)
-        )
-
-        tooltip_x = mouse_pos[0] + 15
-        tooltip_y = mouse_pos[1] + 15
-
-        if tooltip_x + max_w > self.screen.get_width():
-            tooltip_x = mouse_pos[0] - max_w - 5
-        if tooltip_y + total_h > self.screen.get_height():
-            tooltip_y = mouse_pos[1] - total_h - 5
-
-        resized_bg = pygame.transform.scale(
-            self.assets["ui_inf"], (max_w, total_h)
-        )
-        current_y = padding
-        for surf in text_surfaces:
-            resized_bg.blit(surf, (padding, current_y))
-            current_y += surf.get_height() + line_spacing
-
-        self.screen.blit(resized_bg, (tooltip_x, tooltip_y))
+            self.ui_info.draw_hub_tooltip(self.drone_network.hubs.get(hub))
 
     def check_over_pos(self) -> str | None:
         """
@@ -237,18 +187,13 @@ class Renderer:
             self.all_sprite.draw_sprite(
                 (self.camera.camera_x, self.camera.camera_y)
             )
-            self.camera_text = self.font.render(
-                f" X: {self.camera.camera_x:.1f} |"
-                + f"Y: {self.camera.camera_y:.1f} {'hello':.1}",
-                True,
-                (182, 32, 42),
-            )
             self.fps_text = self.font.render(
                 f"FPS {int(self.clock.get_fps())}", True, "white"
             )
-            self.screen.blit(self.assets["ui"], (WINDOWWIDTH - 100, 0))
-            self.screen.blit(self.assets["ui_pos"], (0, 0))
             self.screen.blit(self.fps_text, (WINDOWWIDTH - 78, 9))
-            self.check_for_ui()
+            if pygame.mouse.get_just_pressed()[0]:
+                self.check_for_ui()
             self.all_sprite.update()
+            self.ui_sprite.update()
+            self.ui_sprite.draw(self.screen)
             pygame.display.update()

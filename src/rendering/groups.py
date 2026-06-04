@@ -4,7 +4,7 @@ import sys
 
 import pygame
 
-from .settings import WINDOWWIDTH, WINDOWHEIGHT
+from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
 
 class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):

@@ -1,9 +1,13 @@
 """Module that contain every model for the rendering."""
 
-from typing import Generator, Any
+import os
+
 import pygame
 
-from ..parsers.model import Connection, Hub
+from src.model import DroneNetwork
+from src.rendering.sprite_converter import SpriteConverter
+
+from .. import Connection, Hub
 
 
 class HubSprite(pygame.sprite.Sprite):
@@ -58,6 +62,7 @@ class HubSprite(pygame.sprite.Sprite):
         return world_rect.collidepoint(mouse_world)
 
     def update(self) -> None:
+        """Update the color of the hub."""
         if self.color_name == "rainbow":
             self.color = pygame.Color(0, 0, 0)
             self.color.hsva = (self.hue, 100, 100, 100)
@@ -136,12 +141,113 @@ class ConnectionSprite(pygame.sprite.Sprite):
                 self.connection.max_link_capacity * 4,
             )
 
-    def update_animation(self) -> None:
-        pass
-
 
 # TODO: Make the info sprite for the hub and utils
 class InfoSprite(pygame.sprite.Sprite):
-    def __init__(self, sprite: pygame.Surface) -> None:
-        self.image = sprite
-        self.rect = self.image.get_frect()
+    """Basic Information sprite.
+
+    Attributes:
+        frames: Every frame of the image.
+        frame_size: The size of each frame.
+        screen: The screen size.
+        image: The actual sprite.
+        drone_network: The DroneNetwork class.
+        rect: The rect of the sprite
+    """
+
+    def __init__(self, sprite_name: str, drone_network: DroneNetwork) -> None:
+        """Everything starts here.
+
+        Args:
+            sprite_name: The name of the sprite file.
+            drone_network: The DroneNetwork class.
+        """
+        super().__init__()
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.frames = SpriteConverter().convert_sprite(
+            pygame.image.load(os.path.join(base_dir, "assets", sprite_name)),
+            (3, 3),
+        )
+        self.frame_size = self.frames[0].size
+        self.screen = pygame.display.get_surface()
+        if self.screen is None:
+            return
+        self.image = pygame.Surface(
+            (self.screen.size[0] - 192, 128)
+        ).convert_alpha()
+        self.image.fill((0, 0, 0, 10))
+
+        self.drone_network = drone_network
+        self.rect = self.image.get_frect(center=(self.screen.size[0] // 2, 68))
+        self.build_info((self.screen.size[0] - 192, 128))
+
+    def build_info(self, size: tuple[int, int]) -> None:
+        """Build the info bubble sprite.
+
+        Args:
+            size: The size of the sprite.
+        """
+        if self.image is None:
+            return
+        for row in range(0, size[0], self.frame_size[0]):
+            for col in range(0, size[1], self.frame_size[1]):
+                if col == 0 and row == 0:
+                    self.image.blit(self.frames[0], (row, col))
+                elif row == 0 and col >= size[1] - self.frame_size[1]:
+                    self.image.blit(self.frames[2], (row, col))
+                elif (
+                    col >= size[1] - self.frame_size[1]
+                    and row >= size[0] - self.frame_size[0]
+                ):
+                    self.image.blit(self.frames[8], (row, col))
+                elif col == 0 and row >= size[0] - self.frame_size[0]:
+                    self.image.blit(self.frames[6], (row, col))
+                elif col == 0:
+                    self.image.blit(self.frames[3], (row, col))
+                elif col >= size[1] - self.frame_size[1]:
+                    self.image.blit(self.frames[5], (row, col))
+                elif row == 0:
+                    self.image.blit(self.frames[1], (row, col))
+                elif row >= size[0] - self.frame_size[0]:
+                    self.image.blit(self.frames[7], (row, col))
+                else:
+                    self.image.blit(self.frames[4], (row, col))
+
+    def draw_hub_tooltip(self, hub: Hub | None) -> None:
+        """Draw the information in the sprite.
+
+        Args:
+            hub: The hub to show.
+        """
+        if self.screen is None:
+            return
+        self.build_info((self.screen.size[0] - 192, 128))
+        real_hub = hub
+        if not real_hub:
+            return
+        lines = [
+            f"Name: {real_hub.name}",
+            f"Pos: x:{real_hub.x} y:{real_hub.y}",
+            f"ZoneType: {real_hub.metadata.zone.name}",
+            f"Color: {real_hub.metadata.color}",
+            f"MaxDrone: {real_hub.metadata.max_drones}",
+            f"Current Drone: {real_hub.current_drone}",
+            f"Nb drone: {self.drone_network.nb_drones}",
+        ]
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        fonts = os.path.join(base_dir, "assets", "Oxanium-Bold.ttf")
+        font = pygame.font.Font(fonts, 18)
+
+        text_surfaces = [
+            font.render(line, True, (255, 255, 255)) for line in lines
+        ]
+        if self.image is None:
+            return
+        self.image.blit(text_surfaces[0], (30, 25))
+        self.image.blit(text_surfaces[1], (30, 50))
+        self.image.blit(text_surfaces[2], (30, 75))
+        self.image.blit(text_surfaces[3], (250, 25))
+        self.image.blit(text_surfaces[4], (250, 50))
+        self.image.blit(text_surfaces[5], (250, 75))
+        self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 200, 25))

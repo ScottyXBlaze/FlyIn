@@ -43,7 +43,15 @@ class Metadata(BaseModel):
 
 
 class Hub(BaseModel):
-    """Hub class."""
+    """Basic Hub class.
+
+    Attributes:
+        name: The name of the hub.
+        x: The position x of the hub.
+        y: The position y of the hub.
+        metadata: The metadata of the hub.
+        current_drone: The number of drone in the hub.
+    """
 
     name: str
     x: int
@@ -59,9 +67,11 @@ class Hub(BaseModel):
         return self
 
     def add_drone(self) -> None:
+        """Add a drone in the hub."""
         self.current_drone += 1
 
     def remove_drone(self) -> None:
+        """Remove a drone in the hub."""
         self.current_drone -= 1
 
 

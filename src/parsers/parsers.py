@@ -1,7 +1,8 @@
 """Module that contain the parser of the program."""
 
 from typing import Any
-from .model import DroneNetwork, Hub, Connection
+
+from .. import Connection, DroneNetwork, Hub
 
 
 class Parsers:

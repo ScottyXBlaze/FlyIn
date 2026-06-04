@@ -1,6 +1,6 @@
 """Module that contain a printer to print statistics of the network."""
 
-from .model import Hub, Metadata, DroneNetwork
+from .. import DroneNetwork, Hub, Metadata
 
 
 class ModelPrinter:
