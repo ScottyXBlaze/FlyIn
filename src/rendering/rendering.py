@@ -4,6 +4,8 @@ import pygame
 import os
 import sys
 
+from src.rendering.camera import Camera
+
 from .model import HubSprite, ConnectionSprite
 
 from ..parsers.model import DroneNetwork, Hub
@@ -32,13 +34,11 @@ class Renderer:
         pygame.display.set_caption("FlyIn - Drone Simulator")
 
         # Camera
-        self.camera_x: int = 0
-        self.camera_y: int = 0
-        self.draging: bool = False
-        self.last_mouse_pos: tuple[int, int] = (0, 0)
+        self.camera = Camera()
 
         # Text
         self.font = pygame.font.SysFont(None, 20)
+
         # DroneNetwork
         self.drone_network = drone_network
         self.bound = self.check_bound(self.drone_network.hubs)
@@ -47,7 +47,7 @@ class Renderer:
         self.all_sprite = AllSprite()
 
         # Assets
-        self.assets: dict[str, Any] = {}
+        self.assets: dict[str, pygame.Surface] = {}
 
         self.running = True
 
@@ -94,10 +94,10 @@ class Renderer:
 
     def handle_camera(self) -> None:
         """Handle the camera to not go too far."""
-        self.camera_x = min(self.bound[0], self.camera_x)
-        self.camera_x = max(self.bound[2], self.camera_x)
-        self.camera_y = min(self.bound[1], self.camera_y)
-        self.camera_y = max(self.bound[3], self.camera_y)
+        self.camera.camera_x = min(self.bound[0], self.camera.camera_x)
+        self.camera.camera_x = max(self.bound[2], self.camera.camera_x)
+        self.camera.camera_y = min(self.bound[1], self.camera.camera_y)
+        self.camera.camera_y = max(self.bound[3], self.camera.camera_y)
 
     def check_bound(self, hubs: dict[str, Hub]) -> list[int]:
         """Check the limits of the scree based on hubs coordinates."""
@@ -116,18 +116,22 @@ class Renderer:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    self.draging = True
-                    self.last_mouse_pos = event.pos
+                    self.camera.draging = True
+                    self.camera.last_mouse_pos = event.pos
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.draging = False
+                    self.camera.draging = False
 
             elif event.type == pygame.MOUSEMOTION:
-                if self.draging:
-                    self.camera_x -= event.pos[0] - self.last_mouse_pos[0]
-                    self.camera_y -= event.pos[1] - self.last_mouse_pos[1]
-                    self.last_mouse_pos = event.pos
+                if self.camera.draging:
+                    self.camera.camera_x -= (
+                        event.pos[0] - self.camera.last_mouse_pos[0]
+                    )
+                    self.camera.camera_y -= (
+                        event.pos[1] - self.camera.last_mouse_pos[1]
+                    )
+                    self.camera.last_mouse_pos = event.pos
 
     def get_input(self, delta: float) -> None:
         """
@@ -137,10 +141,10 @@ class Renderer:
             delta (float): Delta time.
         """
         keys = pygame.key.get_pressed()
-        self.camera_x += int(
+        self.camera.camera_x += int(
             200 * delta * (keys[pygame.K_d] - keys[pygame.K_a])
         )
-        self.camera_y += int(
+        self.camera.camera_y += int(
             200 * delta * (keys[pygame.K_s] - keys[pygame.K_w])
         )
 
@@ -215,8 +219,8 @@ class Renderer:
         center_x = self.screen.get_width() // 2
         center_y = self.screen.get_height() // 2
 
-        mouse_world_x = mouse_pos[0] - center_x + self.camera_x
-        mouse_world_y = mouse_pos[1] - center_y + self.camera_y
+        mouse_world_x = mouse_pos[0] - center_x + self.camera.camera_x
+        mouse_world_y = mouse_pos[1] - center_y + self.camera.camera_y
         for hub in self.all_sprite.sprites():
             if isinstance(hub, HubSprite):
                 if hub.is_hovered((mouse_world_x, mouse_world_y)):
@@ -230,10 +234,12 @@ class Renderer:
             self.check_event()
             self.get_input(dt)
             self.screen.blit(self.assets["ui_main"])
-            self.all_sprite.draw_sprite((self.camera_x, self.camera_y))
+            self.all_sprite.draw_sprite(
+                (self.camera.camera_x, self.camera.camera_y)
+            )
             self.camera_text = self.font.render(
-                f" X: {self.camera_x:.1f} |"
-                + f"Y: {self.camera_y:.1f} {'hello':.1}",
+                f" X: {self.camera.camera_x:.1f} |"
+                + f"Y: {self.camera.camera_y:.1f} {'hello':.1}",
                 True,
                 (182, 32, 42),
             )
@@ -242,7 +248,6 @@ class Renderer:
             )
             self.screen.blit(self.assets["ui"], (WINDOWWIDTH - 100, 0))
             self.screen.blit(self.assets["ui_pos"], (0, 0))
-            self.screen.blit(self.camera_text, (2, 9))
             self.screen.blit(self.fps_text, (WINDOWWIDTH - 78, 9))
             self.check_for_ui()
             self.all_sprite.update()

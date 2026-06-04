@@ -31,6 +31,7 @@ class Metadata(BaseModel):
         if (
             self.color.lower() != "none"
             and self.color.lower() not in THECOLORS.keys()
+            and self.color.lower() != "rainbow"
         ):
             print("Invalid color arguments: " + self.color)
             print("Setting color as White")
@@ -48,6 +49,7 @@ class Hub(BaseModel):
     x: int
     y: int
     metadata: Metadata = Field(default=Metadata())
+    current_drone: int = Field(default=0)
 
     @model_validator(mode="after")
     def validate_name(self) -> Self:
@@ -56,6 +58,12 @@ class Hub(BaseModel):
             raise ValueError("Invalid name parameters")
         return self
 
+    def add_drone(self) -> None:
+        self.current_drone += 1
+
+    def remove_drone(self) -> None:
+        self.current_drone -= 1
+
 
 class Connection(BaseModel):
     """Connection Class."""
@@ -63,6 +71,7 @@ class Connection(BaseModel):
     hub1: str
     hub2: str
     max_link_capacity: int = Field(gt=0, default=1)
+    current_drone: int = Field(default=0)
 
     @model_validator(mode="after")
     def validate_hubs(self) -> Self:

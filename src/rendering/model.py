@@ -1,5 +1,6 @@
 """Module that contain every model for the rendering."""
 
+from typing import Generator, Any
 import pygame
 
 from ..parsers.model import Connection, Hub
@@ -22,7 +23,12 @@ class HubSprite(pygame.sprite.Sprite):
         self.pos: tuple[int, int] = self.transform_pos(pos)
         self.image = pygame.Surface((30, 30))
         self.rect = self.image.get_frect(topleft=self.pos)
-        self.image.fill(color)
+        self.color_name = color
+        self.hue = 0
+        if color == "rainbow":
+            self.image.fill("black")
+        else:
+            self.image.fill(color)
 
     @staticmethod
     def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
@@ -50,6 +56,16 @@ class HubSprite(pygame.sprite.Sprite):
         world_rect.topleft = (world_x, world_y)
 
         return world_rect.collidepoint(mouse_world)
+
+    def update(self) -> None:
+        if self.color_name == "rainbow":
+            self.color = pygame.Color(0, 0, 0)
+            self.color.hsva = (self.hue, 100, 100, 100)
+            if self.image:
+                self.image.fill(self.color)
+            self.hue += 4
+            if self.hue >= 360:
+                self.hue = 0
 
 
 class ConnectionSprite(pygame.sprite.Sprite):
@@ -119,3 +135,13 @@ class ConnectionSprite(pygame.sprite.Sprite):
                 self.transform_pos(start_pos),
                 self.connection.max_link_capacity * 4,
             )
+
+    def update_animation(self) -> None:
+        pass
+
+
+# TODO: Make the info sprite for the hub and utils
+class InfoSprite(pygame.sprite.Sprite):
+    def __init__(self, sprite: pygame.Surface) -> None:
+        self.image = sprite
+        self.rect = self.image.get_frect()

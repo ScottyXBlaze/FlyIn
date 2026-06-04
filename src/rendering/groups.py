@@ -24,8 +24,8 @@ class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
             target_pos (tuple[int, int]): The position of
             where to draw every sprite.
         """
-        self.offset.x = -(target_pos[0] - WINDOWWIDTH / 2)
-        self.offset.y = -(target_pos[1] - WINDOWHEIGHT / 2)
+        self.offset.x = -(target_pos[0] - WINDOWWIDTH // 2)
+        self.offset.y = -(target_pos[1] - WINDOWHEIGHT // 2)
 
         self.hub_layout = [
             sprite for sprite in self if not hasattr(sprite, "connection")
