@@ -16,7 +16,11 @@ from .settings import WINDOWHEIGHT, WINDOWWIDTH
 class Renderer:
     """Rendering class for the FlyIn Project."""
 
-    def __init__(self, drone_network: DroneNetwork) -> None:
+    def __init__(
+        self,
+        drone_network: DroneNetwork,
+        heuristic_value: dict[str, int],
+    ) -> None:
         """
         Everything starts here.
 
@@ -47,7 +51,9 @@ class Renderer:
 
         # Assets
         self.assets: dict[str, pygame.Surface] = {}
-        self.ui_info = InfoSprite("BackUI.png", self.drone_network)
+        self.ui_info = InfoSprite(
+            "BackUI.png", self.drone_network, heuristic_value
+        )
         self.ui_sprite.add(self.ui_info)
 
         self.running = True

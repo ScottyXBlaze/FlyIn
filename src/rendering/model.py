@@ -155,7 +155,12 @@ class InfoSprite(pygame.sprite.Sprite):
         rect: The rect of the sprite
     """
 
-    def __init__(self, sprite_name: str, drone_network: DroneNetwork) -> None:
+    def __init__(
+        self,
+        sprite_name: str,
+        drone_network: DroneNetwork,
+        heuristic_value: dict[str, int],
+    ) -> None:
         """Everything starts here.
 
         Args:
@@ -178,6 +183,7 @@ class InfoSprite(pygame.sprite.Sprite):
         self.image.fill((0, 0, 0, 10))
 
         self.drone_network = drone_network
+        self.heuristic_value = heuristic_value
         self.rect = self.image.get_frect(center=(self.screen.size[0] // 2, 68))
         self.build_info((self.screen.size[0] - 192, 128))
 
@@ -233,12 +239,13 @@ class InfoSprite(pygame.sprite.Sprite):
         lines = [
             f"Name: {real_hub.name}",
             f"Pos: x:{real_hub.x} y:{real_hub.y}",
-            f"ZoneType: {real_hub.metadata.zone.name}",
-            f"Color: {real_hub.metadata.color}",
+            f"ZoneType: {real_hub.metadata.zone.name.capitalize()}",
+            f"Color: {real_hub.metadata.color.capitalize()}",
             f"MaxDrone: {real_hub.metadata.max_drones}",
             f"Current Drone: {real_hub.current_drone}",
             f"Nb drone: {self.drone_network.nb_drones}",
-            f"Connect to:  {connections}",
+            f"Connected to: {connections}",
+            f"Heuristic value: {self.heuristic_value.get(real_hub.name)}",
         ]
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -250,11 +257,12 @@ class InfoSprite(pygame.sprite.Sprite):
         ]
         if self.image is None:
             return
-        self.image.blit(text_surfaces[0], (30, 25))
-        self.image.blit(text_surfaces[1], (30, 51))
+        self.image.blit(text_surfaces[0], (28, 25))
+        self.image.blit(text_surfaces[1], (28, 51))
         self.image.blit(text_surfaces[2], (250, 25))
         self.image.blit(text_surfaces[3], (250, 51))
         self.image.blit(text_surfaces[4], (480, 25))
         self.image.blit(text_surfaces[5], (480, 51))
         self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 200, 25))
-        self.image.blit(text_surfaces[7], (30, 80))
+        self.image.blit(text_surfaces[8], (self.image.get_size()[0] - 200, 51))
+        self.image.blit(text_surfaces[7], (28, 80))

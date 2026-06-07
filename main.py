@@ -1,6 +1,6 @@
 """Main file."""
 
-from src import Parsers, Renderer
+from src import Parsers, Renderer, Algorithm
 
 
 class Main:
@@ -19,10 +19,12 @@ class Main:
             "maps/hard/03_ultimate_challenge.txt",
             "maps/medium/02_circular_loop.txt",
             "maps/medium/03_priority_puzzle.txt",
+            "maps/test/01_blocked_hub.txt",
         ]
-        self.parsers = Parsers(self.maps_list[0])
+        self.parsers = Parsers(self.maps_list[10])
         self.network = self.parsers.read_line()
-        self.renderer = Renderer(self.network)
+        self.algorithm = Algorithm(self.network)
+        self.renderer = Renderer(self.network, self.algorithm.heuristic_value)
 
     def run(self) -> None:
         """Run the entire program."""
