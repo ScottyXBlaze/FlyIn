@@ -1,3 +1,15 @@
+# *************************************************************************** #
+#                                                                             #
+#                                                        :::      ::::::::    #
+#    rendering.py                                      :+:      :+:    :+:    #
+#                                                    +:+ +:+         +:+      #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
+#                                                +#+#+#+#+#+   +#+            #
+#    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/07 19:53:44 by nyramana        ###   ########.fr        #
+#                                                                             #
+# *************************************************************************** #
+
 """Module that contain the main rendering class."""
 
 import os
@@ -19,7 +31,7 @@ class Renderer:
     def __init__(
         self,
         drone_network: DroneNetwork,
-        heuristic_value: dict[str, int],
+        heuristic_value: dict[str, int | float],
     ) -> None:
         """
         Everything starts here.

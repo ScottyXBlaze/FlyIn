@@ -1,3 +1,15 @@
+# *************************************************************************** #
+#                                                                             #
+#                                                        :::      ::::::::    #
+#    sprite_converter.py                               :+:      :+:    :+:    #
+#                                                    +:+ +:+         +:+      #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
+#                                                +#+#+#+#+#+   +#+            #
+#    Created: 2026/06/07 19:53:49 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/07 19:53:55 by nyramana        ###   ########.fr        #
+#                                                                             #
+# *************************************************************************** #
+
 """Module that contain a basic sprite utilities."""
 
 import pygame

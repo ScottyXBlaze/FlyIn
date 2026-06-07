@@ -1,19 +1,18 @@
-[tool.poetry]
+[project]
 name = "flyin"
 version = "0.1.0"
+requires-python = ">=3.12"
 description = "Drone simulation"
-authors = ["nyramana <nyramana@student.42antananarivo.mg>"]
+authors = [{name="nyramana",  email="nyramana@student.42antananarivo.mg"}]
 readme = "README.md"
 
+[tool.poetry]
+package-mode = false
+
 [tool.poetry.dependencies]
-python3 = "^3.12"
 pygame-ce = "^2.5.7"
 pydantic = "^2.13.4"
 
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 strict = true
@@ -24,5 +23,10 @@ init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
 
-[tool.ruff]
-line-length = 79
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# On confirme à uv que c'est une application/un script simple, pas un package diffusable
+[tool.uv]
+package = false

@@ -1,3 +1,15 @@
+# *************************************************************************** #
+#                                                                             #
+#                                                        :::      ::::::::    #
+#    parsers.py                                        :+:      :+:    :+:    #
+#                                                    +:+ +:+         +:+      #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
+#                                                +#+#+#+#+#+   +#+            #
+#    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/07 19:54:11 by nyramana        ###   ########.fr        #
+#                                                                             #
+# *************************************************************************** #
+
 """Module that contain the parser of the program."""
 
 from typing import Any

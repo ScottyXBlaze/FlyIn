@@ -1,3 +1,15 @@
+# *************************************************************************** #
+#                                                                             #
+#                                                        :::      ::::::::    #
+#    model.py                                          :+:      :+:    :+:    #
+#                                                    +:+ +:+         +:+      #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
+#                                                +#+#+#+#+#+   +#+            #
+#    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/07 19:53:42 by nyramana        ###   ########.fr        #
+#                                                                             #
+# *************************************************************************** #
+
 """Module that contain every model for the rendering."""
 
 import os
@@ -159,7 +171,7 @@ class InfoSprite(pygame.sprite.Sprite):
         self,
         sprite_name: str,
         drone_network: DroneNetwork,
-        heuristic_value: dict[str, int],
+        heuristic_value: dict[str, int | float],
     ) -> None:
         """Everything starts here.
 

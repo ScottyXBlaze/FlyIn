@@ -1,3 +1,15 @@
+# *************************************************************************** #
+#                                                                             #
+#                                                        :::      ::::::::    #
+#    __init__.py                                       :+:      :+:    :+:    #
+#                                                    +:+ +:+         +:+      #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
+#                                                +#+#+#+#+#+   +#+            #
+#    Created: 2026/06/07 19:53:57 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/07 19:53:57 by nyramana        ###   ########.fr        #
+#                                                                             #
+# *************************************************************************** #
+
 """Package that countain every code for the program."""
 
 from .model import Connection, DroneNetwork, Hub, Metadata, ZoneType

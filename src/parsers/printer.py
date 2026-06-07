@@ -1,3 +1,15 @@
+# *************************************************************************** #
+#                                                                             #
+#                                                        :::      ::::::::    #
+#    printer.py                                        :+:      :+:    :+:    #
+#                                                    +:+ +:+         +:+      #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
+#                                                +#+#+#+#+#+   +#+            #
+#    Created: 2026/06/07 19:54:14 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/07 19:54:16 by nyramana        ###   ########.fr        #
+#                                                                             #
+# *************************************************************************** #
+
 """Module that contain a printer to print statistics of the network."""
 
 from .. import DroneNetwork, Hub, Metadata
