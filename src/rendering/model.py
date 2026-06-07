@@ -225,6 +225,11 @@ class InfoSprite(pygame.sprite.Sprite):
         real_hub = hub
         if not real_hub:
             return
+        connections = ", ".join(
+            self.drone_network.connections.get(real_hub.name, {})
+        )
+        if len(connections) > 88:
+            connections = "Too much to show..."
         lines = [
             f"Name: {real_hub.name}",
             f"Pos: x:{real_hub.x} y:{real_hub.y}",
@@ -233,11 +238,12 @@ class InfoSprite(pygame.sprite.Sprite):
             f"MaxDrone: {real_hub.metadata.max_drones}",
             f"Current Drone: {real_hub.current_drone}",
             f"Nb drone: {self.drone_network.nb_drones}",
+            f"Connect to:  {connections}",
         ]
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        fonts = os.path.join(base_dir, "assets", "Oxanium-Bold.ttf")
-        font = pygame.font.Font(fonts, 18)
+        fonts = os.path.join(base_dir, "assets", "JetBrainsMono.ttf")
+        font = pygame.font.Font(fonts, 15)
 
         text_surfaces = [
             font.render(line, True, (255, 255, 255)) for line in lines
@@ -245,9 +251,10 @@ class InfoSprite(pygame.sprite.Sprite):
         if self.image is None:
             return
         self.image.blit(text_surfaces[0], (30, 25))
-        self.image.blit(text_surfaces[1], (30, 50))
-        self.image.blit(text_surfaces[2], (30, 75))
-        self.image.blit(text_surfaces[3], (250, 25))
-        self.image.blit(text_surfaces[4], (250, 50))
-        self.image.blit(text_surfaces[5], (250, 75))
+        self.image.blit(text_surfaces[1], (30, 51))
+        self.image.blit(text_surfaces[2], (250, 25))
+        self.image.blit(text_surfaces[3], (250, 51))
+        self.image.blit(text_surfaces[4], (480, 25))
+        self.image.blit(text_surfaces[5], (480, 51))
         self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 200, 25))
+        self.image.blit(text_surfaces[7], (30, 80))

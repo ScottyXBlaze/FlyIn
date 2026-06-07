@@ -70,20 +70,25 @@ class Parsers:
             line (str): The line to parse.
         """
         args = line.split(" ", 2)
+
+        if len(args) < 2:
+            raise ValueError("Invalid connection value")
+
         connection = args[1].split("-")
 
         if len(connection) < 2:
             raise ValueError("Invalid connection value")
 
         hub1, hub2 = [i.strip() for i in connection]
-        for hub in connection:
+        for hub in [hub1, hub2]:
             if hub not in self.connections:
-                self.connections[hub.strip()] = set()
+                self.connections[hub] = set()
 
         max_link_capacity = 1
         if len(args) == 3:
-            if args[2].startswith("[") and args[2].endswith("]"):
-                key, value = args[2].strip()[1:-1].split("=", 1)
+            metadata = args[2].strip()
+            if metadata.startswith("[") and metadata.endswith("]"):
+                key, value = metadata[1:-1].split("=", 1)
                 if key == "max_link_capacity":
                     max_link_capacity = int(value)
                 else:
