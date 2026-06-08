@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:24 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:54:25 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/08 20:16:25 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -40,6 +40,7 @@ class ReverseDijkstra:
         while open_list:
             current_cost, current_hub = heapq.heappop(open_list)
 
+            real_hub = drone_connection.hubs[current_hub]
             if network_compass.get(current_hub):
                 continue
 
@@ -49,14 +50,18 @@ class ReverseDijkstra:
                 new_cost = current_cost
                 if hub.name in network_compass:
                     continue
-                if hub.metadata.zone == ZoneType.restricted:
+
+                if real_hub.metadata.zone == ZoneType.restricted:
                     new_cost += 2
                 elif (
-                    hub.metadata.zone == ZoneType.normal
-                    or hub.metadata.zone == ZoneType.priority
+                    real_hub.metadata.zone == ZoneType.normal
+                    or real_hub.metadata.zone == ZoneType.priority
                 ):
                     new_cost += 1
                 else:
+                    new_cost = -1
+
+                if hub.metadata.zone == ZoneType.blocked:
                     new_cost = -1
 
                 if new_cost >= 0:

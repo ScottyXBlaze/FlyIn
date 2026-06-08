@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:54:00 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/08 20:22:59 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -110,9 +110,7 @@ class DroneNetwork(BaseModel):
     start_hub: str = Field(default="")
     end_hub: str = Field(default="")
     hubs: dict[str, Hub] = Field(default_factory=dict)
-    raw_connection: list[Connection] = Field(
-        default_factory=list, exclude=False
-    )
+    raw_connection: list[Connection] = Field(exclude=False)
     connections: dict[str, set[str]] = Field(default_factory=dict)
 
     @property
@@ -129,3 +127,32 @@ class DroneNetwork(BaseModel):
         """Get the neighbor of the hub."""
         neighbor_names = self.connections.get(hub_name, set())
         return [self.hubs[name] for name in neighbor_names]
+
+
+class Vector2:
+    """Simple 2D vector class."""
+
+    def __init__(self) -> None:
+        """Everything starts here."""
+        self.x = 0
+        self.y = 0
+
+    def set_position(self, x: int, y: int) -> None:
+        """
+        Set a new value for the vector.
+
+        Args:
+            x (int): x position.
+            y (int): y position.
+        """
+        self.x = x
+        self.y = y
+
+    def get_position(self) -> tuple[int, int]:
+        """
+        Get the value of the vector.
+
+        Returns:
+            tuple[int, int]: The position in a tuple format.
+        """
+        return self.x, self.y

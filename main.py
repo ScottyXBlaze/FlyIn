@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:54:04 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/08 20:24:06 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -33,10 +33,10 @@ class Main:
             "maps/medium/03_priority_puzzle.txt",
             "maps/test/01_blocked_hub.txt",
         ]
-        self.parsers = Parsers(self.maps_list[10])
+        self.parsers = Parsers(self.maps_list[0])
         self.network = self.parsers.read_line()
         self.algorithm = Algorithm(self.network)
-        self.renderer = Renderer(self.network, self.algorithm.heuristic_value)
+        self.renderer = Renderer(self.network, self.algorithm.h_value)
 
     def run(self) -> None:
         """Run the entire program."""

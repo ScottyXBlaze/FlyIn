@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:53:42 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/08 20:23:17 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -257,7 +257,7 @@ class InfoSprite(pygame.sprite.Sprite):
             f"Current Drone: {real_hub.current_drone}",
             f"Nb drone: {self.drone_network.nb_drones}",
             f"Connected to: {connections}",
-            f"Heuristic value: {self.heuristic_value.get(real_hub.name)}",
+            f"Turn left to goal: {self.heuristic_value.get(real_hub.name)}",
         ]
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -275,6 +275,6 @@ class InfoSprite(pygame.sprite.Sprite):
         self.image.blit(text_surfaces[3], (250, 51))
         self.image.blit(text_surfaces[4], (480, 25))
         self.image.blit(text_surfaces[5], (480, 51))
-        self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 200, 25))
-        self.image.blit(text_surfaces[8], (self.image.get_size()[0] - 200, 51))
+        self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 220, 25))
+        self.image.blit(text_surfaces[8], (self.image.get_size()[0] - 220, 51))
         self.image.blit(text_surfaces[7], (28, 80))
