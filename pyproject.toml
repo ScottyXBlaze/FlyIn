@@ -1,32 +1,13 @@
 [project]
 name = "flyin"
 version = "0.1.0"
-requires-python = ">=3.12"
-description = "Drone simulation"
-authors = [{name="nyramana",  email="nyramana@student.42antananarivo.mg"}]
+description = "Multi path finding agent."
 readme = "README.md"
-
-[tool.poetry]
-package-mode = false
-
-[tool.poetry.dependencies]
-pygame-ce = "^2.5.7"
-pydantic = "^2.13.4"
-
-
-[tool.mypy]
-strict = true
-plugins = ["pydantic.mypy"]
-
-[tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-# On confirme à uv que c'est une application/un script simple, pas un package diffusable
-[tool.uv]
-package = false
+requires-python = ">=3.13"
+dependencies = [
+    "flake8>=7.3.0",
+    "flake8-docstrings>=1.7.0",
+    "mypy>=2.1.0",
+    "pydantic>=2.13.4",
+    "pygame-ce>=2.5.7",
+]

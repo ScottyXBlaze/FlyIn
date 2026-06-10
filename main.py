@@ -6,11 +6,13 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/08 20:24:06 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 11:23:52 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Main file."""
+
+import sys
 
 from src import Parsers, Renderer, Algorithm
 
@@ -20,6 +22,10 @@ class Main:
 
     def __init__(self) -> None:
         """Everything starts here."""
+        if len(sys.argv) != 2:
+            self.print_error()
+            sys.exit(1)
+
         self.maps_list = [
             "maps/challenger/01_the_impossible_dream.txt",
             "maps/easy/01_linear_path.txt",
@@ -33,14 +39,29 @@ class Main:
             "maps/medium/03_priority_puzzle.txt",
             "maps/test/01_blocked_hub.txt",
         ]
-        self.parsers = Parsers(self.maps_list[0])
+
+    def run(self) -> None:
+        """Run the entire program."""
+        self.parsers = Parsers(sys.argv[1])
         self.network = self.parsers.read_line()
         self.algorithm = Algorithm(self.network)
         self.renderer = Renderer(self.network, self.algorithm.h_value)
 
-    def run(self) -> None:
-        """Run the entire program."""
         self.renderer.run()
+        self.algorithm.run()
+
+    @staticmethod
+    def print_error() -> None:
+
+        print("""
+==== Usage ====
+
+[Using the python file]
+uv run python3 main.py <mapfile>
+
+[Using the Makefile]
+make run MAP=<mapfile>
+""")
 
 
 if __name__ == "__main__":

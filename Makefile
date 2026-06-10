@@ -3,13 +3,13 @@ DEPENDENCY_FILE=requirements.txt
 NAME=FLY_IN
 
 install:
-	$(UV) pip install -r $(DEPENDENCY_FILE)
+	@$(UV) sync
 
 run:
-	$(UV) run main.py
+	@$(UV) run main.py
 
 debug:
-	echo "Debugging..."
+	@echo "Debugging..."
 	$(UV) run pydb main.py
 
 clean:

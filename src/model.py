@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/08 20:22:59 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 11:15:52 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -85,6 +85,13 @@ class Hub(BaseModel):
     def remove_drone(self) -> None:
         """Remove a drone in the hub."""
         self.current_drone -= 1
+
+    @property
+    def get_position(self) -> tuple[int, int]:
+        return self.x, self.y
+
+    def is_available(self) -> bool:
+        return self.current_drone < self.metadata.max_drones
 
 
 class Connection(BaseModel):
