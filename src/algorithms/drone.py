@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/08 19:53:37 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/08 20:19:59 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 13:02:45 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -27,6 +27,7 @@ class Drone:
         """
         self.id = id
         self._position = Vector2()
+        self.is_in_connection: bool = False
 
     def move(self, x: int, y: int) -> None:
         """

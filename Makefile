@@ -6,7 +6,7 @@ install:
 	@$(UV) sync
 
 run:
-	@$(UV) run main.py
+	@$(UV) run main.py $(MAP)
 
 debug:
 	@echo "Debugging..."
