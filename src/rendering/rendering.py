@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:53:44 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 15:36:03 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -83,7 +83,7 @@ class Renderer:
 
     def load_connections(self) -> None:
         """Load every connection sprite."""
-        for connection in self.drone_network.raw_connection:
+        for _, connection in self.drone_network.raw_connection.items():
             hub1 = self.drone_network.hubs.get(connection.hub1)
             hub2 = self.drone_network.hubs.get(connection.hub2)
             if hub1 is not None and hub2 is not None:
@@ -201,7 +201,7 @@ class Renderer:
             dt = self.clock.tick(60) / 1000
             self.check_event()
             self.get_input(dt)
-            self.screen.blit(self.assets["ui_main"])
+            self.screen.blit(self.assets["ui_main"], (0, 0))
             self.all_sprite.draw_sprite(
                 (self.camera.camera_x, self.camera.camera_y)
             )

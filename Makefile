@@ -1,4 +1,4 @@
-UV=uv
+UV := $(shell which uv)
 DEPENDENCY_FILE=requirements.txt
 NAME=FLY_IN
 
@@ -10,7 +10,7 @@ run:
 
 debug:
 	@echo "Debugging..."
-	$(UV) run pydb main.py
+	@.venv/bin/python3 -m ipdb main.py $(MAP)
 
 clean:
 	@echo "cleanning..."
@@ -32,4 +32,4 @@ lint-strict:
 	@$(UV) run python3 -m flake8 . --exclude=.venv
 	@$(UV) run python3 -m mypy --strict . --exclude=.venv
 
-re: fclean install
+re: fclean install clean lint lint-strict debug

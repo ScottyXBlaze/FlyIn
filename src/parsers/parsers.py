@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:54:11 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 16:11:13 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -31,7 +31,7 @@ class Parsers:
         self.raw_data: dict[str, Any] = {}
         self.hubs: dict[str, Hub] = {}
         self.connections: dict[str, set[str]] = {}
-        self.raw_connections: list[Connection] = []
+        self.raw_connections: dict[str, Connection] = {}
 
     def read_line(self) -> DroneNetwork:
         """
@@ -107,10 +107,14 @@ class Parsers:
                     raise ValueError("Invalid metadata")
 
         self.add_connections(hub1, hub2)
-        self.raw_connections.append(
-            Connection(
-                hub1=hub1, hub2=hub2, max_link_capacity=max_link_capacity
-            )
+        self.raw_connections.update(
+            {
+                hub1
+                + "-"
+                + hub2: Connection(
+                    hub1=hub1, hub2=hub2, max_link_capacity=max_link_capacity
+                )
+            }
         )
 
     def add_connections(self, hub1: str, hub2: str) -> None:

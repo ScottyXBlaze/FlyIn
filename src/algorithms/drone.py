@@ -6,11 +6,13 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/08 19:53:37 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/10 13:02:45 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 16:26:20 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the base class for the drone."""
+
+from src.model import Connection, Hub
 
 from .. import Vector2
 
@@ -28,6 +30,8 @@ class Drone:
         self.id = id
         self._position = Vector2()
         self.is_in_connection: bool = False
+        self.target_hub: Hub | None = None
+        self.target_connection: Connection | None = None
 
     def move(self, x: int, y: int) -> None:
         """

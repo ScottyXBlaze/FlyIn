@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/10 11:23:52 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 17:31:47 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -49,10 +49,11 @@ class Main:
 
         self.renderer.run()
         self.algorithm.run()
+        # ModelPrinter().print_drone_network(self.network)
 
     @staticmethod
     def print_error() -> None:
-
+        """Print an error and usage message."""
         print("""
 ==== Usage ====
 

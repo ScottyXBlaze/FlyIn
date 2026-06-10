@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/10 11:15:52 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/10 17:37:32 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -88,9 +88,21 @@ class Hub(BaseModel):
 
     @property
     def get_position(self) -> tuple[int, int]:
+        """
+        Get the position of the hub.
+
+        Returns:
+            tuple: The position (x, y).
+        """
         return self.x, self.y
 
     def is_available(self) -> bool:
+        """
+        Check if the hub can still hold drone.
+
+        Returns:
+            bool: True if it can.
+        """
         return self.current_drone < self.metadata.max_drones
 
 
@@ -109,6 +121,23 @@ class Connection(BaseModel):
             raise ValueError("Same hub connection name")
         return self
 
+    def is_available(self) -> bool:
+        """
+        Check if the connection is available.
+
+        Returns:
+            bool: True if so.
+        """
+        return self.max_link_capacity > self.current_drone
+
+    def add_drone(self) -> None:
+        """Add a drone to the connection."""
+        self.current_drone += 1
+
+    def remove_drone(self) -> None:
+        """Remove a drone to the connection."""
+        self.current_drone -= 1
+
 
 class DroneNetwork(BaseModel):
     """DroneNetwork Class."""
@@ -117,8 +146,18 @@ class DroneNetwork(BaseModel):
     start_hub: str = Field(default="")
     end_hub: str = Field(default="")
     hubs: dict[str, Hub] = Field(default_factory=dict)
-    raw_connection: list[Connection] = Field(exclude=False)
+    raw_connection: dict[str, Connection] = Field(default_factory=dict)
     connections: dict[str, set[str]] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def init_size(self) -> Self:
+        """Init the size of the starting and ending hub."""
+        start_hub = self.hubs.get(self.start_hub)
+        end_hub = self.hubs.get(self.end_hub)
+        if start_hub and end_hub:
+            start_hub.metadata.max_drones = self.nb_drones
+            end_hub.metadata.max_drones = self.nb_drones
+        return self
 
     @property
     def get_start_hub(self) -> Hub:
@@ -134,6 +173,24 @@ class DroneNetwork(BaseModel):
         """Get the neighbor of the hub."""
         neighbor_names = self.connections.get(hub_name, set())
         return [self.hubs[name] for name in neighbor_names]
+
+    def get_connection_between(
+        self, hub1: str, hub2: str
+    ) -> Connection | None:
+        """
+        Get the connection between two hub.
+
+        Args:
+            hub1 (str): The first hub.
+            hub2 (str): The second hub.
+        Returns:
+            Connection: The connection between each hub.
+        """
+        for name, connection in self.raw_connection.items():
+            splitted_name = name.split("-")
+            if hub1 in splitted_name and hub2 in splitted_name:
+                return connection
+        return None
 
 
 class Vector2:

@@ -5,9 +5,14 @@ description = "Multi path finding agent."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "black>=26.5.1",
     "flake8>=7.3.0",
     "flake8-docstrings>=1.7.0",
+    "ipdb>=0.13.13",
     "mypy>=2.1.0",
     "pydantic>=2.13.4",
     "pygame-ce>=2.5.7",
 ]
+
+[tool.black]
+line-length = 79
