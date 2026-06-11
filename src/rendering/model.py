@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 13:15:47 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 15:23:02 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -20,6 +20,8 @@ from src.model import DroneNetwork
 from src.rendering.sprite_converter import SpriteConverter
 
 from .. import Connection, Hub
+
+from .settings import CELL_SIZE, OFFSET
 
 
 class HubSprite(pygame.sprite.Sprite):
@@ -37,7 +39,7 @@ class HubSprite(pygame.sprite.Sprite):
         super().__init__()
         self.name = name
         self.pos: tuple[int, int] = self.transform_pos(pos)
-        self.image = pygame.Surface((30, 30))
+        self.image = pygame.Surface((CELL_SIZE, CELL_SIZE))
         self.rect = self.image.get_frect(topleft=self.pos)
         self.color_name = color
         self.hue = 0
@@ -56,7 +58,9 @@ class HubSprite(pygame.sprite.Sprite):
         Returns:
             tuple: The transformed position.
         """
-        return pos[0] * 50, pos[1] * 50
+        return pos[0] * (CELL_SIZE + OFFSET[0]), pos[1] * (
+            CELL_SIZE + OFFSET[1]
+        )
 
     def is_hovered(self, mouse_world: tuple[int, int]) -> bool:
         """
@@ -68,7 +72,7 @@ class HubSprite(pygame.sprite.Sprite):
         world_x = self.pos[0]
         world_y = self.pos[1]
 
-        world_rect = pygame.Rect(0, 0, 30, 30)
+        world_rect = pygame.Rect(0, 0, CELL_SIZE, CELL_SIZE)
         world_rect.topleft = (world_x, world_y)
 
         return world_rect.collidepoint(mouse_world)
@@ -122,8 +126,8 @@ class ConnectionSprite(pygame.sprite.Sprite):
         )
         self.rect = self.image.get_frect(
             topleft=(
-                position[0] + 12,
-                position[1] + 12,
+                position[0] + CELL_SIZE // 2,
+                position[1] + CELL_SIZE // 2,
             ),
         )
 
@@ -132,7 +136,9 @@ class ConnectionSprite(pygame.sprite.Sprite):
     @staticmethod
     def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
         """Transform the original position to match the screen."""
-        return pos[0] * 50, pos[1] * 50
+        return pos[0] * (OFFSET[0] + CELL_SIZE), pos[1] * (
+            OFFSET[0] + CELL_SIZE
+        )
 
     def draw_line(self) -> None:
         """Draw the Line that connect the two hub."""
@@ -188,7 +194,9 @@ class InfoSprite(pygame.sprite.Sprite):
         self.screen = pygame.display.get_surface()
         if self.screen is None:
             return
-        self.image = pygame.Surface((self.screen.size[0] - 192, 128)).convert_alpha()
+        self.image = pygame.Surface(
+            (self.screen.size[0] - 192, 128)
+        ).convert_alpha()
         self.image.fill((0, 0, 0, 10))
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -244,7 +252,9 @@ class InfoSprite(pygame.sprite.Sprite):
         real_hub = hub
         if not real_hub:
             return
-        connections = ", ".join(self.drone_network.connections.get(real_hub.name, {}))
+        connections = ", ".join(
+            self.drone_network.connections.get(real_hub.name, {})
+        )
         if len(connections) > 88:
             connections = "Too much to show..."
         lines = [

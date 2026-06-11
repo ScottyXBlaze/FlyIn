@@ -6,13 +6,14 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:40 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 12:48:57 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 15:52:21 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the class to easily have a camera."""
 
 import sys
+from typing import Any
 
 import pygame
 
@@ -43,20 +44,28 @@ class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
         self.hub_layout = [
             sprite
             for sprite in self
-            if not hasattr(sprite, "connection") and not hasattr(sprite, "drone_id")
+            if not hasattr(sprite, "connection")
+            and not hasattr(sprite, "drone_id")
         ]
         self.connection_layout = [
             sprite
             for sprite in self
-            if hasattr(sprite, "connection") and not hasattr(sprite, "drone_id")
+            if hasattr(sprite, "connection")
+            and not hasattr(sprite, "drone_id")
         ]
 
-        self.drone_layout = [sprite for sprite in self if hasattr(sprite, "drone_id")]
+        self.drone_layout = [
+            sprite for sprite in self if hasattr(sprite, "drone_id")
+        ]
 
         if self.display_surface is None:
             sys.exit(1)
 
-        for layout in [self.connection_layout, self.hub_layout, self.drone_layout]:
+        for layout in [
+            self.connection_layout,
+            self.hub_layout,
+            self.drone_layout,
+        ]:
             for sprite in sorted(
                 layout,
                 key=lambda sprite: (
@@ -65,16 +74,16 @@ class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
                     else (0, 0)
                 ),
             ):
-                if isinstance(sprite.rect, pygame.Rect | pygame.FRect) and isinstance(
-                    sprite.image, pygame.Surface
-                ):
+                if isinstance(
+                    sprite.rect, pygame.Rect | pygame.FRect
+                ) and isinstance(sprite.image, pygame.Surface):
                     draw_rect = sprite.rect.move(self.offset.x, self.offset.y)
                     self.display_surface.blit(
                         sprite.image,
                         (int(draw_rect.x), int(draw_rect.y)),
                     )
 
-    def update(self, *args, **kwargs) -> None:
+    def update(self, *args: Any, **kwargs: Any) -> None:
         """Update sprites while passing delta time only to drones."""
         dt = args[0] if args else kwargs.get("dt")
         for sprite in self.sprites():

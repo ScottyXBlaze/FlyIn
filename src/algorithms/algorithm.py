@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 11:25:54 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 15:55:43 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -31,6 +31,7 @@ class Algorithm:
             drone_network (DroneNetwork): The drone network class.
         """
         self.drone_network = drone_network
+
         self.h_value = ReverseDijkstra.calculate_heuristic(drone_network)
         self.drones: list[Drone] = self.set_drones()
         self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
@@ -41,7 +42,9 @@ class Algorithm:
 
         end_hub = self.drone_network.get_end_hub
         end_hub.current_drone = 0
-        self.result = []
+
+        # Variable to store the result
+        self.result: list = []
 
     def set_drones(self) -> list[Drone]:
         """
@@ -77,6 +80,7 @@ class Algorithm:
             connection = self.drone_network.get_connection_between(
                 hub_name, hub.name
             )
+            # If the connection is not available (for restricted)
             if not connection or not connection.is_available():
                 continue
 
@@ -177,12 +181,11 @@ class Algorithm:
 
         turn = 0
         while True:
-            result: list[list[tuple[int, int]]] = []
+            result: list[str] = []
             drones_to_remove = []
             drones_snapshot = list(self.drones)
             moved_this_turn: set[int] = set()
 
-            # First, finish drones already in transit so their connection is freed
             for drone in drones_snapshot:
                 if not drone.is_in_connection:
                     continue

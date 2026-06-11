@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 13:19:43 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 15:55:58 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -26,7 +26,8 @@ class Main:
         self.visual = False
         self.check_args()
 
-    def check_args(self):
+    def check_args(self) -> None:
+        """Check the argument of the program."""
         for arg in sys.argv[1:]:
             if arg == "--visual":
                 self.visual = True
@@ -51,7 +52,9 @@ class Main:
 
         if self.visual:
             path = self.algorithm.get_path()
-            self.renderer = Renderer(self.network, self.algorithm.h_value, path)
+            self.renderer = Renderer(
+                self.network, self.algorithm.h_value, path
+            )
             self.renderer.run()
         # ModelPrinter().print_drone_network(self.network)
 

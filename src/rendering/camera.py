@@ -6,12 +6,13 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:38 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:53:38 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 15:27:31 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Camera module for the rendering system."""
 
+from src.rendering.settings import CELL_SIZE, OFFSET
 from .. import Hub
 
 
@@ -20,8 +21,11 @@ class Camera:
 
     def __init__(self) -> None:
         """Everything starts here."""
+        # Position
         self.camera_x = 0
         self.camera_y = 0
+
+        # Usefull variable
         self.draging = False
         self.last_mouse_pos = (0, 0)
         self.bound = [0, 0, 0, 0]
@@ -44,8 +48,17 @@ class Camera:
         Returns:
             list: Maximum and Minimum value for the camera.
         """
-        maximum_x = max(hubs.values(), key=lambda x: x.x).x * 50 - 200
-        maximum_y = max(hubs.values(), key=lambda x: x.y).y * 50 - 300
-        minimum_x = min(hubs.values(), key=lambda x: x.x).x * 50 + 200
-        minimum_y = min(hubs.values(), key=lambda x: x.y).y * 50 + 100
+        minimum_x = min(hubs.values(), key=lambda x: x.x).x * (
+            OFFSET[0] + CELL_SIZE
+        )
+        minimum_y = min(hubs.values(), key=lambda x: x.y).y * (
+            OFFSET[1] + CELL_SIZE
+        )
+        maximum_x = max(hubs.values(), key=lambda x: x.x).x * (
+            OFFSET[0] + CELL_SIZE
+        )
+        maximum_y = max(hubs.values(), key=lambda x: x.y).y * (
+            OFFSET[1] + CELL_SIZE
+        )
+
         return [maximum_x, maximum_y, minimum_x, minimum_y]

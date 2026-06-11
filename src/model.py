@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 13:14:43 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 15:36:53 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -174,7 +174,9 @@ class DroneNetwork(BaseModel):
         neighbor_names = self.connections.get(hub_name, set())
         return [self.hubs[name] for name in neighbor_names]
 
-    def get_connection_between(self, hub1: str, hub2: str) -> Connection | None:
+    def get_connection_between(
+        self, hub1: str, hub2: str
+    ) -> Connection | None:
         """
         Get the connection between two hub.
 
