@@ -41,7 +41,7 @@ class ReverseDijkstra:
             current_cost, current_hub = heapq.heappop(open_list)
 
             real_hub = drone_connection.hubs[current_hub]
-            if network_compass.get(current_hub):
+            if current_hub in network_compass:
                 continue
 
             network_compass[current_hub] = current_cost
