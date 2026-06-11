@@ -1,6 +1,7 @@
 # FlyIn
 
-> Always the best one.
+> Finishing is the most important thing.
+
 # Description:
 
 # Instruction:

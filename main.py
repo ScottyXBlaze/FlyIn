@@ -6,12 +6,13 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 10:02:35 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 12:00:00 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Main file."""
 
+from pprint import pprint
 import sys
 
 from src import Parsers, Renderer, Algorithm
@@ -32,6 +33,7 @@ class Main:
         self.network = self.parsers.read_line()
         self.algorithm = Algorithm(self.network)
         self.algorithm.run()
+        # pprint(self.algorithm.drone_positions_per_turn)
 
         self.renderer = Renderer(self.network, self.algorithm.h_value)
         self.renderer.run()
@@ -40,7 +42,8 @@ class Main:
     @staticmethod
     def print_error() -> None:
         """Print an error and usage message."""
-        print("""
+        print(
+            """
 ==== Usage ====
 
 [Using the python file]
@@ -48,7 +51,8 @@ uv run python3 main.py <mapfile>
 
 [Using the Makefile]
 make run MAP=<mapfile>
-""")
+"""
+        )
 
 
 if __name__ == "__main__":

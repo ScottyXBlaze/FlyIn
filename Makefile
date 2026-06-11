@@ -18,10 +18,6 @@ clean:
 	@find . -type d -name ".mypy_cache" -exec rm -rf {} +
 	@echo "Project cleaned successfully"
 
-fclean: clean
-	@echo "Removing the virtual environment file..."
-	@rm -rf .venv
-
 lint:
 	@echo "Checking code quality..."
 	@$(UV) run python3 -m flake8 . --exclude=.venv
@@ -32,4 +28,4 @@ lint-strict:
 	@$(UV) run python3 -m flake8 . --exclude=.venv
 	@$(UV) run python3 -m mypy --strict . --exclude=.venv
 
-re: fclean install clean lint lint-strict debug
+.PHONY: fclean install clean lint lint-strict debug

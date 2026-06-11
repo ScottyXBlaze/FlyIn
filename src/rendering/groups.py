@@ -61,6 +61,8 @@ class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
                 if isinstance(
                     sprite.rect, pygame.Rect | pygame.FRect
                 ) and isinstance(sprite.image, pygame.Surface):
+                    draw_rect = sprite.rect.move(self.offset.x, self.offset.y)
                     self.display_surface.blit(
-                        sprite.image, sprite.rect.topleft + self.offset
+                        sprite.image,
+                        (int(draw_rect.x), int(draw_rect.y)),
                     )

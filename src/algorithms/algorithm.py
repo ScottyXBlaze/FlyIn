@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 10:32:38 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 11:25:54 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -33,6 +33,7 @@ class Algorithm:
         self.drone_network = drone_network
         self.h_value = ReverseDijkstra.calculate_heuristic(drone_network)
         self.drones: list[Drone] = self.set_drones()
+        self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
 
         # Make the end hub and start hub to be bigger to store every drone
         start_hub = self.drone_network.get_start_hub
@@ -40,8 +41,7 @@ class Algorithm:
 
         end_hub = self.drone_network.get_end_hub
         end_hub.current_drone = 0
-
-        self.result: list[tuple[int, tuple[int, int]]] = []
+        self.result = []
 
     def set_drones(self) -> list[Drone]:
         """
@@ -74,11 +74,16 @@ class Algorithm:
             if hub_h >= current_h:
                 continue
 
-            connection = self.drone_network.get_connection_between(hub_name, hub.name)
+            connection = self.drone_network.get_connection_between(
+                hub_name, hub.name
+            )
             if not connection or not connection.is_available():
                 continue
 
-            if hub.name != self.drone_network.end_hub and not hub.is_available():
+            if (
+                hub.name != self.drone_network.end_hub
+                and not hub.is_available()
+            ):
                 continue
 
             if hub_h < min_h:
@@ -166,79 +171,13 @@ class Algorithm:
             drone.move(pos_x, pos_y)
             return f"D{drone.id}-{new_hub.name}", new_hub.get_position
 
-    def movae_drone(
-        self,
-        drone: Drone,
-        new_hub: Hub,
-        old_hub: Hub,
-    ) -> str | None:
-        """
-        Move the drone and modify it's value.
-
-        Args:
-            drone (Drone): Drone class.
-            new_hub (Hub): The destination hub.
-            old_hub (Hub): The ancient hub.
-        Returns:
-            str: The action while moving the drone.
-        """
-        if not drone.is_in_connection:
-            if getattr(new_hub.metadata, "zone", None) == ZoneType.restricted:
-                # Phase 1 : Entrée en transit (Zone restreinte)
-                connection = self.drone_network.get_connection_between(
-                    new_hub.name, old_hub.name
-                )
-                if not connection or not connection.is_available():
-                    return ""
-
-                if (
-                    new_hub.name != self.drone_network.end_hub
-                    and not new_hub.is_available()
-                ):
-                    return ""
-
-                old_hub.remove_drone()
-                new_hub.add_drone()
-                drone.is_in_connection = True
-                drone.target_connection = connection
-                drone.target_connection.add_drone()
-                drone.target_hub = new_hub
-                return f"D{drone.id}-{old_hub.name}-{new_hub.name}"
-            else:
-                # Déplacement normal (1 tour)
-                if (
-                    new_hub.name != self.drone_network.end_hub
-                    and not new_hub.is_available()
-                ):
-                    return ""
-
-                pos_x, pos_y = new_hub.get_position
-                drone.move(pos_x, pos_y)
-                old_hub.remove_drone()
-                new_hub.add_drone()
-                return f"D{drone.id}-{new_hub.name}"
-        else:
-            dest_hub = drone.target_hub
-            if not dest_hub:
-                return ""
-            if drone.target_connection:
-                drone.target_connection.remove_drone()
-                drone.target_connection = None
-            pos_x, pos_y = dest_hub.get_position
-            drone.move(pos_x, pos_y)
-
-            # Reset des variables de transit
-            drone.is_in_connection = False
-            drone.target_hub = None
-            return f"D{drone.id}-{dest_hub.name}"
-
     def run(self) -> None:
         """Run the algorithm."""
         end_position = self.drone_network.get_end_hub.get_position
 
         turn = 0
         while True:
-            result = []
+            result: list[list[tuple[int, int]]] = []
             drones_to_remove = []
             drones_snapshot = list(self.drones)
             moved_this_turn: set[int] = set()
@@ -256,7 +195,12 @@ class Algorithm:
                 if not current_hub:
                     raise ValueError("Position not matching")
 
-                move, position = self.moove_drone(drone, drone.target_hub, current_hub)
+                if not drone.target_hub:
+                    return
+
+                move, position = self.moove_drone(
+                    drone, drone.target_hub, current_hub
+                )
                 if move:
                     result.append(move)
                     self.result.append((turn, position))
@@ -284,7 +228,9 @@ class Algorithm:
                 if not closest_neighbor:
                     continue
 
-                move, position = self.moove_drone(drone, closest_neighbor, current_hub)
+                move, position = self.moove_drone(
+                    drone, closest_neighbor, current_hub
+                )
                 if move:
                     result.append(move)
                     self.result.append((turn, position))
@@ -301,10 +247,27 @@ class Algorithm:
                 return
 
             # If nothing moved and nobody is in transit, the network is stuck
-            if not result and not any(drone.is_in_connection for drone in self.drones):
+            if not result and not any(
+                drone.is_in_connection for drone in self.drones
+            ):
                 print(turn)
                 return
+
+            # Record positions of all drones for this turn
+            turn_positions: dict[int, tuple[int, int]] = {}
+            for drone in self.drones:
+                turn_positions[drone.id] = drone.get_position
+            self.drone_positions_per_turn.append(turn_positions)
 
             turn += 1
 
             print(" ".join(result))
+
+    def get_path(self) -> list[dict[int, tuple[int, int]]]:
+        """
+        Get the path of every drone.
+
+        Returns:
+            list[list[tuple[int, int]]]: The path of every drone.
+        """
+        return self.drone_positions_per_turn
