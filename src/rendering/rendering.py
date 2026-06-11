@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 15:57:39 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 18:55:51 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -19,6 +19,7 @@ import sys
 import pygame
 
 from .. import DroneNetwork
+from .base_state import State
 from .camera import Camera
 from .drone import Drone
 from .groups import AllSprite
@@ -26,7 +27,7 @@ from .model import ConnectionSprite, HubSprite, InfoSprite
 from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
 
-class Renderer:
+class Renderer(State):
     """Rendering class for the FlyIn Project."""
 
     def __init__(
@@ -82,6 +83,7 @@ class Renderer:
         )
         self.ui_sprite.add(self.ui_info)
 
+        self.ui_info.draw_hub_tooltip(self.drone_network.get_start_hub)
         self.running = True
 
         self.load_assets()
@@ -93,7 +95,12 @@ class Renderer:
         """Load every hub sprite."""
         for _, hub in self.drone_network.hubs.items():
             self.all_sprite.add(
-                HubSprite((hub.x, hub.y), hub.metadata.color, hub.name)
+                HubSprite(
+                    (hub.x, hub.y),
+                    hub.metadata.color,
+                    hub.name,
+                    self.assets["hub"],
+                )
             )
 
     def load_connections(self) -> None:
@@ -113,6 +120,7 @@ class Renderer:
             "ui_pos": "BackPos.png",
             "ui_inf": "BackInfo.png",
             "ui_main": "BackMain.png",
+            "hub": "Hub.png",
         }
         for name, path in image_file.items():
             try:
@@ -133,9 +141,9 @@ class Renderer:
 
         for drone_id in range(1, self.drone_network.nb_drones + 1):
             color = (
-                random.randint(120, 255),
-                random.randint(120, 255),
-                random.randint(120, 255),
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255),
             )
             offset = (random.randint(-8, 8), random.randint(-8, 8))
             drone = Drone(
@@ -205,6 +213,8 @@ class Renderer:
                     self.advance_turn()
                 elif event.key == pygame.K_p:
                     self.previous_turn()
+                # elif event.key == pygame.K_r:
+                # self.run_to_end()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:

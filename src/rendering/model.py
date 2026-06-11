@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 15:23:02 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 18:46:25 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -16,18 +16,22 @@ import os
 
 import pygame
 
-from src.model import DroneNetwork
-from src.rendering.sprite_converter import SpriteConverter
-
 from .. import Connection, Hub
-
+from ..model import DroneNetwork
 from .settings import CELL_SIZE, OFFSET
+from .sprite_converter import SpriteConverter
 
 
 class HubSprite(pygame.sprite.Sprite):
     """Sprite model for everu hub."""
 
-    def __init__(self, pos: tuple[int, int], color: str, name: str) -> None:
+    def __init__(
+        self,
+        pos: tuple[int, int],
+        color: str,
+        name: str,
+        sprite: pygame.Surface,
+    ) -> None:
         """
         Every initialization.
 
@@ -39,14 +43,28 @@ class HubSprite(pygame.sprite.Sprite):
         super().__init__()
         self.name = name
         self.pos: tuple[int, int] = self.transform_pos(pos)
-        self.image = pygame.Surface((CELL_SIZE, CELL_SIZE))
+        self.image = sprite.copy()
+        self.image = pygame.transform.scale(self.image, (CELL_SIZE, CELL_SIZE))
+        self.copy_image = self.image.copy()
         self.rect = self.image.get_frect(topleft=self.pos)
         self.color_name = color
         self.hue = 0
-        if color == "rainbow":
-            self.image.fill("black")
-        else:
-            self.image.fill(color)
+        if color != "rainbow":
+            self.image = self._tint_sprite(
+                self.image,
+                pygame.color.THECOLORS.get(color.lower(), (0, 0, 0, 0)),
+            )
+
+    @staticmethod
+    def _tint_sprite(
+        sprite: pygame.Surface, color: tuple[int, int, int, int]
+    ) -> pygame.Surface:
+        """Apply a light color tint to the drone sprite."""
+        image = sprite.copy()
+        tint = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+        tint.fill(color)
+        image.blit(tint, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        return image
 
     @staticmethod
     def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
@@ -83,7 +101,10 @@ class HubSprite(pygame.sprite.Sprite):
             self.color = pygame.Color(0, 0, 0)
             self.color.hsva = (self.hue, 100, 100, 100)
             if self.image:
-                self.image.fill(self.color)
+                self.image = self._tint_sprite(
+                    self.copy_image,
+                    (self.color.r, self.color.g, self.color.b, self.color.a),
+                )
             self.hue += 4
             if self.hue >= 360:
                 self.hue = 0
@@ -226,9 +247,9 @@ class InfoSprite(pygame.sprite.Sprite):
                     col >= size[1] - self.frame_size[1]
                     and row >= size[0] - self.frame_size[0]
                 ):
-                    self.image.blit(self.frames[8], (row, col))
+                    pass
                 elif col == 0 and row >= size[0] - self.frame_size[0]:
-                    self.image.blit(self.frames[6], (row, col))
+                    pass
                 elif col == 0:
                     self.image.blit(self.frames[3], (row, col))
                 elif col >= size[1] - self.frame_size[1]:
@@ -239,6 +260,13 @@ class InfoSprite(pygame.sprite.Sprite):
                     self.image.blit(self.frames[7], (row, col))
                 else:
                     self.image.blit(self.frames[4], (row, col))
+        # Always print the right one
+        self.image.blit(
+            self.frames[6], self.frames[6].get_frect(topright=(size[0], 0))
+        )
+        self.image.blit(
+            self.frames[8], self.frames[8].get_frect(bottomright=(size))
+        )
 
     def draw_hub_tooltip(self, hub: Hub | None) -> None:
         """Draw the information in the sprite.
@@ -266,7 +294,6 @@ class InfoSprite(pygame.sprite.Sprite):
             f"Current Drone: {real_hub.current_drone}",
             f"Total drone: {self.drone_network.nb_drones}",
             f"Connected to: {connections}",
-            f"Turn left to goal: {self.heuristic_value.get(real_hub.name)}",
         ]
 
         text_surfaces = [
@@ -274,11 +301,14 @@ class InfoSprite(pygame.sprite.Sprite):
         ]
         if self.image is None:
             return
-        self.image.blit(text_surfaces[0], (28, 25))
-        self.image.blit(text_surfaces[1], (28, 51))
-        self.image.blit(text_surfaces[2], (250, 25))
-        self.image.blit(text_surfaces[3], (250, 51))
-        self.image.blit(text_surfaces[4], (480, 25))
-        self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 220, 25))
-        self.image.blit(text_surfaces[8], (self.image.get_size()[0] - 220, 51))
-        self.image.blit(text_surfaces[7], (28, 80))
+        image_size = self.image.get_size()
+        position_x = [i for i in range(25, image_size[0], image_size[0] // 3)]
+        position_y = [i for i in range(20, image_size[1], image_size[1] // 4)]
+        # Print every text in their position
+        self.image.blit(text_surfaces[0], (position_x[0], position_y[0]))
+        self.image.blit(text_surfaces[1], (position_x[0], position_y[1]))
+        self.image.blit(text_surfaces[2], (position_x[1], position_y[0]))
+        self.image.blit(text_surfaces[3], (position_x[1], position_y[1]))
+        self.image.blit(text_surfaces[4], (position_x[2], position_y[0]))
+        self.image.blit(text_surfaces[6], (position_x[2], position_y[1]))
+        self.image.blit(text_surfaces[7], (position_x[0], position_y[2]))

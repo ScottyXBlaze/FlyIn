@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 15:55:58 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 16:22:28 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,7 +14,22 @@
 
 import sys
 
-from src import Parsers, Renderer, Algorithm
+from src import Parsers, Algorithm, Renderer
+
+
+def print_error() -> None:
+    """Print an error and usage message."""
+    print(
+        """
+==== Usage ====
+
+[Using the python file]
+uv run python3 main.py <mapfile>
+
+[Using the Makefile]
+make run MAP=<mapfile>
+"""
+    )
 
 
 class Main:
@@ -35,12 +50,13 @@ class Main:
                 self.path = arg
             else:
                 print("[Error] Too much arguments")
-                self.print_error()
+                print_error()
                 sys.exit(1)
         if self.path == "":
             print("[Error] No enough arguments")
-            self.print_error()
+            print_error()
             sys.exit(1)
+        print()
 
     def run(self) -> None:
         """Run the entire program."""
@@ -48,7 +64,6 @@ class Main:
         self.network = self.parsers.read_line()
         self.algorithm = Algorithm(self.network)
         self.algorithm.run()
-        # pprint(self.algorithm.drone_positions_per_turn)
 
         if self.visual:
             path = self.algorithm.get_path()
@@ -56,22 +71,6 @@ class Main:
                 self.network, self.algorithm.h_value, path
             )
             self.renderer.run()
-        # ModelPrinter().print_drone_network(self.network)
-
-    @staticmethod
-    def print_error() -> None:
-        """Print an error and usage message."""
-        print(
-            """
-==== Usage ====
-
-[Using the python file]
-uv run python3 main.py <mapfile>
-
-[Using the Makefile]
-make run MAP=<mapfile>
-"""
-        )
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 15:36:53 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 16:24:54 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -55,15 +55,7 @@ class Metadata(BaseModel):
 
 
 class Hub(BaseModel):
-    """Basic Hub class.
-
-    Attributes:
-        name: The name of the hub.
-        x: The position x of the hub.
-        y: The position y of the hub.
-        metadata: The metadata of the hub.
-        current_drone: The number of drone in the hub.
-    """
+    """Basic Hub class."""
 
     name: str
     x: int

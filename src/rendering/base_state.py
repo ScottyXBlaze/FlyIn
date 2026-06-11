@@ -1,18 +1,17 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    settings.py                                       :+:      :+:    :+:    #
+#    base_state.py                                     :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
-#    Created: 2026/06/07 19:53:47 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 17:31:46 by nyramana        ###   ########.fr        #
+#    Created: 2026/06/11 18:44:39 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/11 18:45:22 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Module that contain some static variable."""
-
-WINDOWWIDTH, WINDOWHEIGHT = 1000, 600
-
-CELL_SIZE = 50
-OFFSET = (15, 15)
+from abc import ABC, abstractmethod
+class State(ABC):
+    @abstractmethod
+    def run(self) -> None:
+        pass

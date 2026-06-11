@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 15:55:43 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 16:07:45 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -44,7 +44,7 @@ class Algorithm:
         end_hub.current_drone = 0
 
         # Variable to store the result
-        self.result: list = []
+        self.result: list[tuple[int, tuple[int, int]]] = []
 
     def set_drones(self) -> list[Drone]:
         """
@@ -246,14 +246,12 @@ class Algorithm:
 
             # If there are no drones left, we stop
             if not self.drones:
-                print(turn)
                 return
 
             # If nothing moved and nobody is in transit, the network is stuck
             if not result and not any(
                 drone.is_in_connection for drone in self.drones
             ):
-                print(turn)
                 return
 
             # Record positions of all drones for this turn
