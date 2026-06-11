@@ -6,13 +6,12 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 12:00:00 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 13:19:43 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Main file."""
 
-from pprint import pprint
 import sys
 
 from src import Parsers, Renderer, Algorithm
@@ -23,20 +22,37 @@ class Main:
 
     def __init__(self) -> None:
         """Everything starts here."""
-        if len(sys.argv) != 2:
+        self.path = ""
+        self.visual = False
+        self.check_args()
+
+    def check_args(self):
+        for arg in sys.argv[1:]:
+            if arg == "--visual":
+                self.visual = True
+            elif self.path == "":
+                self.path = arg
+            else:
+                print("[Error] Too much arguments")
+                self.print_error()
+                sys.exit(1)
+        if self.path == "":
+            print("[Error] No enough arguments")
             self.print_error()
             sys.exit(1)
 
     def run(self) -> None:
         """Run the entire program."""
-        self.parsers = Parsers(sys.argv[1])
+        self.parsers = Parsers(self.path)
         self.network = self.parsers.read_line()
         self.algorithm = Algorithm(self.network)
         self.algorithm.run()
         # pprint(self.algorithm.drone_positions_per_turn)
 
-        self.renderer = Renderer(self.network, self.algorithm.h_value)
-        self.renderer.run()
+        if self.visual:
+            path = self.algorithm.get_path()
+            self.renderer = Renderer(self.network, self.algorithm.h_value, path)
+            self.renderer.run()
         # ModelPrinter().print_drone_network(self.network)
 
     @staticmethod

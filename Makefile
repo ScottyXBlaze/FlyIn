@@ -8,6 +8,10 @@ install:
 run:
 	@$(UV) run main.py $(MAP)
 
+run-visual:
+	@$(UV) run main.py $(MAP) --visual
+	
+
 debug:
 	@echo "Debugging..."
 	@.venv/bin/python3 -m ipdb main.py $(MAP)
@@ -28,4 +32,4 @@ lint-strict:
 	@$(UV) run python3 -m flake8 . --exclude=.venv
 	@$(UV) run python3 -m mypy --strict . --exclude=.venv
 
-.PHONY: fclean install clean lint lint-strict debug
+.PHONY: run-visual install clean lint lint-strict debug

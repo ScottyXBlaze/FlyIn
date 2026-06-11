@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/08 20:23:17 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 13:15:47 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -154,7 +154,6 @@ class ConnectionSprite(pygame.sprite.Sprite):
             )
 
 
-# TODO: Make the info sprite for the hub and utils
 class InfoSprite(pygame.sprite.Sprite):
     """Basic Information sprite.
 
@@ -189,10 +188,12 @@ class InfoSprite(pygame.sprite.Sprite):
         self.screen = pygame.display.get_surface()
         if self.screen is None:
             return
-        self.image = pygame.Surface(
-            (self.screen.size[0] - 192, 128)
-        ).convert_alpha()
+        self.image = pygame.Surface((self.screen.size[0] - 192, 128)).convert_alpha()
         self.image.fill((0, 0, 0, 10))
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.fonts = os.path.join(base_dir, "assets", "JetBrainsMono.ttf")
+        self.font = pygame.font.Font(self.fonts, 15)
 
         self.drone_network = drone_network
         self.heuristic_value = heuristic_value
@@ -243,9 +244,7 @@ class InfoSprite(pygame.sprite.Sprite):
         real_hub = hub
         if not real_hub:
             return
-        connections = ", ".join(
-            self.drone_network.connections.get(real_hub.name, {})
-        )
+        connections = ", ".join(self.drone_network.connections.get(real_hub.name, {}))
         if len(connections) > 88:
             connections = "Too much to show..."
         lines = [
@@ -253,19 +252,15 @@ class InfoSprite(pygame.sprite.Sprite):
             f"Pos: x:{real_hub.x} y:{real_hub.y}",
             f"ZoneType: {real_hub.metadata.zone.name.capitalize()}",
             f"Color: {real_hub.metadata.color.capitalize()}",
-            f"MaxDrone: {real_hub.metadata.max_drones}",
+            f"Max Drone for hub: {real_hub.metadata.max_drones}",
             f"Current Drone: {real_hub.current_drone}",
-            f"Nb drone: {self.drone_network.nb_drones}",
+            f"Total drone: {self.drone_network.nb_drones}",
             f"Connected to: {connections}",
             f"Turn left to goal: {self.heuristic_value.get(real_hub.name)}",
         ]
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        fonts = os.path.join(base_dir, "assets", "JetBrainsMono.ttf")
-        font = pygame.font.Font(fonts, 15)
-
         text_surfaces = [
-            font.render(line, True, (255, 255, 255)) for line in lines
+            self.font.render(line, True, (255, 255, 255)) for line in lines
         ]
         if self.image is None:
             return
@@ -274,7 +269,6 @@ class InfoSprite(pygame.sprite.Sprite):
         self.image.blit(text_surfaces[2], (250, 25))
         self.image.blit(text_surfaces[3], (250, 51))
         self.image.blit(text_surfaces[4], (480, 25))
-        self.image.blit(text_surfaces[5], (480, 51))
         self.image.blit(text_surfaces[6], (self.image.get_size()[0] - 220, 25))
         self.image.blit(text_surfaces[8], (self.image.get_size()[0] - 220, 51))
         self.image.blit(text_surfaces[7], (28, 80))

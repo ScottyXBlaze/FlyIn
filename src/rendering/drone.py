@@ -6,21 +6,29 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 10:38:23 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 12:07:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 13:47:07 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 import math
 import pygame
+import random
+
+from .sprite_converter import SpriteConverter
 
 
 CELL = 50
-MARGIN = 50
+MARGIN = 0
 
 
-def grid_to_px(gx: int, gy: int) -> tuple[float, float]:
+def grid_to_px(
+    gx: int, gy: int, offset: tuple[int, int] = (0, 0)
+) -> tuple[float, float]:
     """Centre pixel d'une case de la grille."""
-    return (MARGIN + gx * CELL + CELL // 2, MARGIN + gy * CELL + CELL // 2)
+    return (
+        MARGIN + gx * CELL + CELL // 2 + offset[0],
+        MARGIN + gy * CELL + CELL // 2 + offset[1],
+    )
 
 
 def _ease_in_out(t: float) -> float:
@@ -34,22 +42,56 @@ class Drone(pygame.sprite.Sprite):
         id: int,
         position: tuple[int, int],
         sprite: pygame.Surface,
+        color: tuple[int, int, int] | None = None,
+        offset: tuple[int, int] = (0, 0),
     ):
         super().__init__()
         self.drone_id = id
         self.grid_pos = position
+        self.pixel_offset = offset
 
-        self._base_image = sprite.copy()
+        self._frames = SpriteConverter().convert_sprite(sprite, (2, 1))
+        if color is not None:
+            self._frames = [self._tint_sprite(frame, color) for frame in self._frames]
 
-        self.px, self.py = grid_to_px(*position)
+        self.px, self.py = grid_to_px(*position, self.pixel_offset)
         self.anim_speed: float = 0.25
         self._anim_active: bool = False
         self._anim_start: tuple[float, float] = (self.px, self.py)
-        self._anim_end: tuple[float, float] = (self.py, self.py)
+        self._anim_end: tuple[float, float] = (self.px, self.py)
         self._anim_elapsed: float = 0.0
         self._angle: float = 0.0
-        self.image = self._base_image.copy()
+        self._frame_index: int = 0
+        self._frame_elapsed: float = 0.0
+        self.frame_speed: float = random.uniform(0.1, 0.4)
+        self.image = self._build_image(self._frame_index)
         self.rect = self.image.get_frect(center=(self.px, self.py))
+
+    @staticmethod
+    def _tint_sprite(
+        sprite: pygame.Surface, color: tuple[int, int, int]
+    ) -> pygame.Surface:
+        """Apply a light color tint to the drone sprite."""
+        image = sprite.copy()
+        tint = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+        tint.fill((*color, 255))
+        image.blit(tint, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        return image
+
+    def _build_image(self, frame_index: int) -> pygame.Surface:
+        """Build the current drone image from the selected frame and angle."""
+        frame = self._frames[frame_index % len(self._frames)]
+        if self._angle != 0.0:
+            return pygame.transform.rotate(frame, -self._angle)
+        return frame.copy()
+
+    def _sync_sprite(self, frame_index: int | None = None) -> None:
+        """Keep `image` and `rect` aligned with the current pixel position."""
+        if frame_index is not None:
+            self._frame_index = frame_index % len(self._frames)
+        center = self.rect.center if self.rect else (self.px, self.py)
+        self.image = self._build_image(self._frame_index)
+        self.rect = self.image.get_frect(center=center)
 
     @property
     def position(self) -> tuple[int, int]:
@@ -58,17 +100,9 @@ class Drone(pygame.sprite.Sprite):
     @position.setter
     def position(self, new_pos: tuple[int, int]) -> None:
         self.grid_pos = new_pos
-        self.px, self.py = grid_to_px(*new_pos)
+        self.px, self.py = grid_to_px(*new_pos, self.pixel_offset)
         self._anim_active = False
         self._sync_sprite()
-
-    def _sync_sprite(self) -> None:
-        """Keep `image` and `rect` aligned with the current pixel position."""
-        if self._angle != 0.0:
-            self.image = pygame.transform.rotate(self._base_image, -self._angle)
-        else:
-            self.image = self._base_image.copy()
-        self.rect = self.image.get_frect(center=(self.px, self.py))
 
     def move_to(self, dest: tuple[int, int]):
         # If it is already in it's position, don't do anything
@@ -81,21 +115,30 @@ class Drone(pygame.sprite.Sprite):
         # To rotate the drone
         if dx != 0 or dy != 0:
             self._angle = math.degrees(math.atan2(dx, -dy))
-            self._sync_sprite()
 
         self._anim_start = (self.px, self.py)
-        self._anim_end = grid_to_px(*dest)
+        self._anim_end = grid_to_px(*dest, self.pixel_offset)
         self._anim_elapsed = 0.0
         self._anim_active = True
         self.grid_pos = dest
+        self._sync_sprite()
 
     def update(self, dt: float):
+        self._frame_elapsed += dt
+        if self._frame_elapsed >= self.frame_speed:
+            self._frame_elapsed %= self.frame_speed
+            self._sync_sprite(self._frame_index + 1)
+
         if not self._anim_active:
             return
 
         self._anim_elapsed += dt
         t = min(self._anim_elapsed / self.anim_speed, 1.0)
         t = _ease_in_out(t)
+
+        frame_index = 0 if t < 0.5 else 1
+        if frame_index != self._frame_index:
+            self._sync_sprite(frame_index)
 
         sx, sy = self._anim_start
         ex, ey = self._anim_end

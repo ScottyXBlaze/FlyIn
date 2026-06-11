@@ -6,20 +6,21 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/10 15:36:03 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/11 13:21:00 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the main rendering class."""
 
 import os
+import random
 import sys
 
 import pygame
 
-from src.rendering.camera import Camera
-
 from .. import DroneNetwork, Hub
+from .camera import Camera
+from .drone import Drone
 from .groups import AllSprite
 from .model import ConnectionSprite, HubSprite, InfoSprite
 from .settings import WINDOWHEIGHT, WINDOWWIDTH
@@ -32,6 +33,7 @@ class Renderer:
         self,
         drone_network: DroneNetwork,
         heuristic_value: dict[str, int | float],
+        path: list[dict[int, tuple[int, int]]],
     ) -> None:
         """
         Everything starts here.
@@ -54,32 +56,40 @@ class Renderer:
         # DroneNetwork
         self.drone_network = drone_network
         self.bound = self.check_bound(self.drone_network.hubs)
+        self.drone_positions = path
+        self.current_turn = -1
+        self.start_pos = (
+            self.drone_network.get_start_hub.x,
+            self.drone_network.get_start_hub.y,
+        )
+        self.end_pos = (
+            self.drone_network.get_end_hub.x,
+            self.drone_network.get_end_hub.y,
+        )
 
         # Sprite groups
         self.all_sprite = AllSprite()
         self.ui_sprite: pygame.sprite.Group[pygame.sprite.Sprite] = (
             pygame.sprite.Group()
         )
+        self.drones: dict[int, Drone] = {}
 
         # Assets
         self.assets: dict[str, pygame.Surface] = {}
-        self.ui_info = InfoSprite(
-            "BackUI.png", self.drone_network, heuristic_value
-        )
+        self.ui_info = InfoSprite("BackUI.png", self.drone_network, heuristic_value)
         self.ui_sprite.add(self.ui_info)
 
         self.running = True
 
+        self.load_assets()
         self.load_hubs()
         self.load_connections()
-        self.load_assets()
+        self.load_drones()
 
     def load_hubs(self) -> None:
         """Load every hub sprite."""
         for _, hub in self.drone_network.hubs.items():
-            self.all_sprite.add(
-                HubSprite((hub.x, hub.y), hub.metadata.color, hub.name)
-            )
+            self.all_sprite.add(HubSprite((hub.x, hub.y), hub.metadata.color, hub.name))
 
     def load_connections(self) -> None:
         """Load every connection sprite."""
@@ -102,14 +112,74 @@ class Renderer:
         for name, path in image_file.items():
             try:
                 path = os.path.join(base_dir, "assets", path)
-                self.assets[name] = pygame.image.load(path)
+                self.assets[name] = pygame.image.load(path).convert_alpha()
             except pygame.error as e:
                 print(e)
                 sys.exit()
 
+        self.assets["drone"] = pygame.transform.scale2x(self.assets["drone"])
         self.assets["ui_main"] = pygame.transform.scale(
             self.assets["ui_main"], self.screen.get_size()
         )
+
+    def load_drones(self) -> None:
+        """Load every drone sprite at the initial start hub position."""
+        drone_sprite = self.assets["drone"]
+
+        for drone_id in range(1, self.drone_network.nb_drones + 1):
+            color = (
+                random.randint(120, 255),
+                random.randint(120, 255),
+                random.randint(120, 255),
+            )
+            offset = (random.randint(-8, 8), random.randint(-8, 8))
+            drone = Drone(
+                drone_id,
+                self.start_pos,
+                drone_sprite,
+                color=color,
+                offset=offset,
+            )
+            self.drones[drone_id] = drone
+            self.all_sprite.add(drone)
+
+    def turn_is_busy(self) -> bool:
+        """Check if at least one drone is currently moving."""
+        return any(drone.is_moving for drone in self.drones.values())
+
+    def move_to_turn(self, turn_index: int) -> None:
+        """Animate every drone to a specific recorded turn."""
+        if self.turn_is_busy():
+            return
+
+        if turn_index < -1 or turn_index >= len(self.drone_positions):
+            return
+
+        self.current_turn = turn_index
+
+        if turn_index == -1:
+            for drone in self.drones.values():
+                drone.move_to(self.start_pos)
+            return
+
+        turn_positions = self.drone_positions[turn_index]
+
+        for drone_id, drone in self.drones.items():
+            position = turn_positions.get(drone_id, self.end_pos)
+            if turn_index == 0 and drone_id not in turn_positions:
+                position = self.end_pos
+            elif drone_id not in turn_positions:
+                position = self.end_pos
+            if drone.position != position or drone.is_moving:
+                drone.move_to(position)
+
+    def advance_turn(self) -> None:
+        """Move the drones to the next recorded turn."""
+        self.move_to_turn(self.current_turn + 1)
+
+    def previous_turn(self) -> None:
+        """Move the drones to the previous recorded turn."""
+        self.move_to_turn(self.current_turn - 1)
 
     def handle_camera(self) -> None:
         """Handle the camera to not go too far."""
@@ -133,6 +203,12 @@ class Renderer:
             if event.type == pygame.QUIT:
                 self.running = False
 
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_n:
+                    self.advance_turn()
+                elif event.key == pygame.K_p:
+                    self.previous_turn()
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.camera.draging = True
@@ -144,12 +220,8 @@ class Renderer:
 
             elif event.type == pygame.MOUSEMOTION:
                 if self.camera.draging:
-                    self.camera.camera_x -= (
-                        event.pos[0] - self.camera.last_mouse_pos[0]
-                    )
-                    self.camera.camera_y -= (
-                        event.pos[1] - self.camera.last_mouse_pos[1]
-                    )
+                    self.camera.camera_x -= event.pos[0] - self.camera.last_mouse_pos[0]
+                    self.camera.camera_y -= event.pos[1] - self.camera.last_mouse_pos[1]
                     self.camera.last_mouse_pos = event.pos
 
     def get_input(self, delta: float) -> None:
@@ -160,12 +232,8 @@ class Renderer:
             delta (float): Delta time.
         """
         keys = pygame.key.get_pressed()
-        self.camera.camera_x += int(
-            200 * delta * (keys[pygame.K_d] - keys[pygame.K_a])
-        )
-        self.camera.camera_y += int(
-            200 * delta * (keys[pygame.K_s] - keys[pygame.K_w])
-        )
+        self.camera.camera_x += int(200 * delta * (keys[pygame.K_d] - keys[pygame.K_a]))
+        self.camera.camera_y += int(200 * delta * (keys[pygame.K_s] - keys[pygame.K_w]))
 
         if keys[pygame.K_q]:
             self.running = False
@@ -198,20 +266,31 @@ class Renderer:
     def run(self) -> None:
         """Run the rendering."""
         while self.running:
+            # Delta time
             dt = self.clock.tick(60) / 1000
+
+            # Check Event and input
             self.check_event()
             self.get_input(dt)
+
+            # Show the background
             self.screen.blit(self.assets["ui_main"], (0, 0))
-            self.all_sprite.draw_sprite(
-                (self.camera.camera_x, self.camera.camera_y)
-            )
+
+            # Draw every sprite
+            self.all_sprite.draw_sprite((self.camera.camera_x, self.camera.camera_y))
+
+            # Draw the FPS
             self.fps_text = self.font.render(
                 f"FPS {int(self.clock.get_fps())}", True, "white"
             )
             self.screen.blit(self.fps_text, (WINDOWWIDTH - 78, 9))
+
+            # Check if the mouse was pressed
             if pygame.mouse.get_just_pressed()[0]:
                 self.check_for_ui()
-            self.all_sprite.update()
+
+            # Update everything
+            self.all_sprite.update(dt)
             self.ui_sprite.update()
             self.ui_sprite.draw(self.screen)
             pygame.display.update()
