@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:57 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/08 20:05:17 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/12 17:09:41 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,7 +14,7 @@
 
 from .model import Connection, DroneNetwork, Hub, Metadata, ZoneType, Vector2
 from .parsers import ModelPrinter, Parsers
-from .rendering import Renderer
+from .rendering import StateManager
 from .algorithms import Algorithm
 
 __all__ = [
@@ -23,7 +23,7 @@ __all__ = [
     "DroneNetwork",
     "Metadata",
     "ModelPrinter",
-    "Renderer",
+    "StateManager",
     "Connection",
     "ZoneType",
     "Algorithm",

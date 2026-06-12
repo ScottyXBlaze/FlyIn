@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/10 16:11:13 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/12 15:44:08 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -42,6 +42,14 @@ class Parsers:
             of the drone network.
         """
         with open(self.path) as file:
+
+            # Check that the first argument is always the nb of drone
+            line = file.readline().strip()
+            while line.startswith("#") or line.isspace() or line == "":
+                line = file.readline().strip()
+                pass
+
+            self.parse_nb_drones(line)
             for line in file:
                 self.parse_line(line)
         self.raw_data.update(
@@ -61,18 +69,26 @@ class Parsers:
             line (str): The line to parse.
         """
         args = line.split(" ")
-        if args[0].strip() == "nb_drones:":
-            self.raw_data[args[0][:-1]] = args[1]
-        elif line.strip().startswith("hub:"):
+        if line.strip().startswith("hub: "):
             self.parse_hub(line)
-        elif line.strip().startswith("start_hub:"):
+        elif line.strip().startswith("start_hub: "):
             self.raw_data["start_hub"] = args[1]
             self.parse_hub(line)
-        elif line.strip().startswith("end_hub:"):
+        elif line.strip().startswith("end_hub: "):
             self.raw_data["end_hub"] = args[1]
             self.parse_hub(line)
-        elif line.strip().startswith("connection:"):
+        elif line.strip().startswith("connection: "):
             self.parse_connection(line)
+
+    def parse_nb_drones(self, line: str) -> None:
+        if not line.strip().startswith("nb_drones:"):
+            raise ValueError(
+                "Invalid start line (Should be nb_drones: %d)"
+                + f" Got '{line}'"
+            )
+        else:
+            key, value = line.split(" ", 1)
+            self.raw_data[key[:-1]] = value
 
     def parse_connection(self, line: str) -> None:
         """
@@ -91,7 +107,7 @@ class Parsers:
         if len(connection) < 2:
             raise ValueError("Invalid connection value")
 
-        hub1, hub2 = [i.strip() for i in connection]
+        hub1, hub2 = sorted([i.strip() for i in connection])
         for hub in [hub1, hub2]:
             if hub not in self.connections:
                 self.connections[hub] = set()
@@ -125,6 +141,10 @@ class Parsers:
             hub1 (str): Description of hub1.
             hub2 (str): Description of hub2.
         """
+        if hub2 in self.connections[hub1] and hub1 in self.connections[hub2]:
+            raise ValueError(
+                f"Duplicated connection for '{hub1}' and '{hub2}'"
+            )
         self.connections[hub1].add(hub2)
         self.connections[hub2].add(hub1)
 

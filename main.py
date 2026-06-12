@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 16:22:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/12 17:10:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,13 +14,14 @@
 
 import sys
 
-from src import Parsers, Algorithm, Renderer
+from pydantic import ValidationError
+
+from src import Parsers, Algorithm, StateManager
 
 
 def print_error() -> None:
     """Print an error and usage message."""
-    print(
-        """
+    print("""
 ==== Usage ====
 
 [Using the python file]
@@ -28,8 +29,7 @@ uv run python3 main.py <mapfile>
 
 [Using the Makefile]
 make run MAP=<mapfile>
-"""
-    )
+""")
 
 
 class Main:
@@ -60,14 +60,30 @@ class Main:
 
     def run(self) -> None:
         """Run the entire program."""
-        self.parsers = Parsers(self.path)
-        self.network = self.parsers.read_line()
+
+        try:
+            self.parsers = Parsers(self.path)
+            self.network = self.parsers.read_line()
+        except ValidationError as e:
+            for error in e.errors():
+                print(f"[ERROR] {error['msg']}\n")
+            sys.exit(1)
+        except ValueError as e:
+            print(f"[ERROR] {e}\n")
+            sys.exit(1)
+
         self.algorithm = Algorithm(self.network)
+
+        # Check that the path is available
+        if not self.algorithm.h_value.get(self.network.get_start_hub.name):
+            print("[ERROR] Start position is not linked with end position.\n")
+            sys.exit(1)
+
         self.algorithm.run()
 
         if self.visual:
             path = self.algorithm.get_path()
-            self.renderer = Renderer(
+            self.renderer = StateManager(
                 self.network, self.algorithm.h_value, path
             )
             self.renderer.run()
@@ -75,4 +91,7 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    main.run()
+    try:
+        main.run()
+    except KeyboardInterrupt:
+        print("Process ended")

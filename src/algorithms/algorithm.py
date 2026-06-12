@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 16:07:45 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/12 14:25:26 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -35,13 +35,6 @@ class Algorithm:
         self.h_value = ReverseDijkstra.calculate_heuristic(drone_network)
         self.drones: list[Drone] = self.set_drones()
         self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
-
-        # Make the end hub and start hub to be bigger to store every drone
-        start_hub = self.drone_network.get_start_hub
-        start_hub.current_drone = self.drone_network.nb_drones
-
-        end_hub = self.drone_network.get_end_hub
-        end_hub.current_drone = 0
 
         # Variable to store the result
         self.result: list[tuple[int, tuple[int, int]]] = []
@@ -185,7 +178,6 @@ class Algorithm:
             drones_to_remove = []
             drones_snapshot = list(self.drones)
             moved_this_turn: set[int] = set()
-
             for drone in drones_snapshot:
                 if not drone.is_in_connection:
                     continue

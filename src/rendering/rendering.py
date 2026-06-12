@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 18:55:51 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/12 20:56:28 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -84,7 +84,8 @@ class Renderer(State):
         self.ui_sprite.add(self.ui_info)
 
         self.ui_info.draw_hub_tooltip(self.drone_network.get_start_hub)
-        self.running = True
+
+        self.signal = 0
 
         self.load_assets()
         self.load_hubs()
@@ -118,7 +119,6 @@ class Renderer(State):
             "drone": "drone.png",
             "ui": "BackUI.png",
             "ui_pos": "BackPos.png",
-            "ui_inf": "BackInfo.png",
             "ui_main": "BackMain.png",
             "hub": "Hub.png",
         }
@@ -206,13 +206,15 @@ class Renderer(State):
         self.handle_camera()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                self.signal = 1
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_n:
                     self.advance_turn()
-                elif event.key == pygame.K_p:
+                elif event.key == pygame.K_b:
                     self.previous_turn()
+                elif event.key == pygame.K_ESCAPE:
+                    self.signal = 2
                 # elif event.key == pygame.K_r:
                 # self.run_to_end()
 
@@ -278,49 +280,54 @@ class Renderer(State):
                     return hub.name
         return None
 
-    def run(self) -> None:
+    def reset(self):
+        self.signal = 0
+        # self.current_turn = 0
+        # self.move_to_turn(-1)
+
+    def run(self) -> int:
         """Run the rendering."""
-        while self.running:
-            # Delta time
-            dt = self.clock.tick(60) / 1000
+        # Delta time
+        dt = self.clock.tick(60) / 1000
 
-            # Check Event and input
-            self.check_event()
-            self.get_input(dt)
+        # Check Event and input
+        self.check_event()
+        self.get_input(dt)
 
-            # Show the background
-            self.screen.blit(self.assets["ui_main"], (0, 0))
+        # Show the background
+        self.screen.blit(self.assets["ui_main"], (0, 0))
 
-            # Draw every sprite
-            self.all_sprite.draw_sprite(
-                (self.camera.camera_x, self.camera.camera_y)
-            )
+        # Draw every sprite
+        self.all_sprite.draw_sprite(
+            (self.camera.camera_x, self.camera.camera_y)
+        )
 
-            # Draw the FPS
-            self.fps_text = self.font.render(
-                f"FPS {int(self.clock.get_fps())}", True, "white"
-            )
-            self.screen.blit(self.fps_text, (WINDOWWIDTH - 78, 9))
+        # Draw the FPS
+        self.fps_text = self.font.render(
+            f"FPS {int(self.clock.get_fps())}", True, "white"
+        )
+        self.screen.blit(self.fps_text, (WINDOWWIDTH - 78, 9))
 
-            self.turn_text = self.text_font.render(
-                f"Turn: {self.current_turn + 1}", True, "white"
-            )
-            self.screen.blit(self.turn_text, (WINDOWWIDTH // 2 - 10, 140))
+        self.turn_text = self.text_font.render(
+            f"Turn: {self.current_turn + 1}", True, "white"
+        )
+        self.screen.blit(self.turn_text, (WINDOWWIDTH // 2 - 10, 140))
 
-            self.camera_text = self.text_font.render(
-                f"X:{self.camera.camera_x} Y:{self.camera.camera_y}",
-                True,
-                "white",
-            )
-            self.screen.blit(
-                self.camera_text, (WINDOWWIDTH - 120, WINDOWHEIGHT - 40)
-            )
-            # Check if the mouse was pressed
-            if pygame.mouse.get_just_pressed()[0]:
-                self.check_for_ui()
+        self.camera_text = self.text_font.render(
+            f"X:{self.camera.camera_x} Y:{self.camera.camera_y}",
+            True,
+            "white",
+        )
+        self.screen.blit(
+            self.camera_text, (WINDOWWIDTH - 120, WINDOWHEIGHT - 40)
+        )
+        # Check if the mouse was pressed
+        if pygame.mouse.get_just_pressed()[0]:
+            self.check_for_ui()
 
-            # Update everything
-            self.all_sprite.update(dt)
-            self.ui_sprite.update()
-            self.ui_sprite.draw(self.screen)
-            pygame.display.update()
+        # Update everything
+        self.all_sprite.update(dt)
+        self.ui_sprite.update()
+        self.ui_sprite.draw(self.screen)
+        pygame.display.update()
+        return self.signal

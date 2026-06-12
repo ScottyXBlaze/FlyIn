@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 16:24:54 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/12 14:21:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -58,8 +58,8 @@ class Hub(BaseModel):
     """Basic Hub class."""
 
     name: str
-    x: int
-    y: int
+    x: int = Field(ge=-1000, le=1000)
+    y: int = Field(ge=-1000, le=1000)
     metadata: Metadata = Field(default=Metadata())
     current_drone: int = Field(default=0)
 
@@ -149,6 +149,16 @@ class DroneNetwork(BaseModel):
         if start_hub and end_hub:
             start_hub.metadata.max_drones = self.nb_drones
             end_hub.metadata.max_drones = self.nb_drones
+        return self
+
+    @model_validator(mode="after")
+    def check_duplicate(self) -> Self:
+        pos_unavailable: set[tuple[int, int]] = set()
+        for hub in self.hubs.values():
+            if (hub.x, hub.y) in pos_unavailable:
+                raise ValueError("Duplicate position.")
+            else:
+                pos_unavailable.add((hub.x, hub.y))
         return self
 
     @property

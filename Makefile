@@ -8,9 +8,8 @@ install:
 run:
 	@$(UV) run main.py $(MAP)
 
-run-visual:
+run_visual:
 	@$(UV) run main.py $(MAP) --visual
-	
 
 debug:
 	@echo "Debugging..."
@@ -34,4 +33,4 @@ lint-strict:
 	@echo "Checking code quality (mypy strict)..."
 	@$(UV) run python3 -m mypy --strict . --exclude=.venv
 
-.PHONY: run-visual install clean lint lint-strict debug
+.PHONY: run run_visual install clean lint lint-strict debug
