@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:48:12 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 14:26:02 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 15:38:08 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -47,6 +47,10 @@ class StateManager:
         self.clock = pygame.time.Clock()
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
+        pygame.display.set_icon(
+            pygame.image.load(os.path.join(base_dir, "assets", "MainLogo.png"))
+        )
+
         pygame.mixer.music.load(
             os.path.join(base_dir, "assets", "music", "Clouds.ogg")
         )

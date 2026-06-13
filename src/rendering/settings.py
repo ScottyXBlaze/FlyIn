@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:47 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 14:22:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 15:35:52 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,5 +14,5 @@
 
 WINDOWWIDTH, WINDOWHEIGHT = 1400, 800
 
-CELL_SIZE = 80
-OFFSET = (15, 15)
+CELL_SIZE = 50
+OFFSET = (20, 20)

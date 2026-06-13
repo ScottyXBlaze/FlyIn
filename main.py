@@ -33,7 +33,7 @@ make run MAP=<mapfile>
 
 
 class Main:
-    """Main function."""
+    """Main Class."""
 
     def __init__(self) -> None:
         """Everything starts here."""
@@ -61,8 +61,8 @@ class Main:
     def run(self) -> None:
         """Run the entire program."""
         try:
-            self.parsers = Parsers(self.path)
-            self.network = self.parsers.read_line()
+            parsers = Parsers(self.path)
+            network = parsers.read_line()
         except ValidationError as e:
             for error in e.errors():
                 print(f"[ERROR] {error['msg']}\n")
@@ -74,10 +74,10 @@ class Main:
             print(f"[Error] Unexpected {e}")
             sys.exit(1)
 
-        self.algorithm = Algorithm(self.network)
+        self.algorithm = Algorithm(network)
 
         # Check that the path is available
-        if not self.algorithm.h_value.get(self.network.get_start_hub.name):
+        if not self.algorithm.h_value.get(network.get_start_hub.name):
             print("[ERROR] Start position is not linked with end position.\n")
             sys.exit(1)
 
@@ -86,7 +86,7 @@ class Main:
         if self.visual:
             path = self.algorithm.get_path()
             self.renderer = StateManager(
-                self.network, self.algorithm.h_value, path
+                network, self.algorithm.h_value, path
             )
             self.renderer.run()
 

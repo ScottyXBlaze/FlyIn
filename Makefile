@@ -1,6 +1,4 @@
 UV := $(shell which uv)
-DEPENDENCY_FILE=requirements.txt
-NAME=FLY_IN
 
 install:
 	@$(UV) sync
@@ -13,7 +11,7 @@ run_visual:
 
 debug:
 	@echo "Debugging..."
-	@.venv/bin/python3 -m ipdb main.py $(MAP)
+	@.venv/bin/python3 -m pdb main.py $(MAP)
 
 clean:
 	@echo "cleanning..."

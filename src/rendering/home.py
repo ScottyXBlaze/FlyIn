@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:51:36 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 14:23:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 15:54:19 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -15,7 +15,7 @@
 import pygame
 import os
 from .base_state import State
-from .settings import WINDOWWIDTH
+from .settings import WINDOWHEIGHT, WINDOWWIDTH
 from .sprite_converter import SpriteConverter
 
 
@@ -122,12 +122,12 @@ class Home(State):
         )
 
         self.button_start = Button(
-            (WINDOWWIDTH - 500, 50),
+            ((WINDOWWIDTH // 2 - 200), WINDOWHEIGHT - 400),
             self.frames["start"],
         )
 
         self.button_end = Button(
-            (WINDOWWIDTH - 500, 180),
+            ((WINDOWWIDTH // 2 - 200), WINDOWHEIGHT - 250),
             self.frames["exit"],
         )
         self.all_sprites.add(self.button_start, self.button_end)
@@ -137,7 +137,14 @@ class Home(State):
             self.background = pygame.Surface(
                 self.screen.get_frect().size
             ).convert_alpha()
-            self.background.fill((2, 62, 138))
+            self.background = pygame.image.load(
+                os.path.join(self.base_dir, "assets", "BackMain2.png")
+            )
+
+            self.background = pygame.transform.scale(
+                self.background,
+                self.screen.get_size() if self.screen else (0, 0),
+            )
         # self.activation_music = pygame.mixer.music.load(self.base_dir)
 
     def init_sprites(self) -> None:
@@ -179,7 +186,7 @@ class Home(State):
         if self.back:
             self.screen.blit(self.back)
             self.screen.blit(self.background)
-        self.screen.blit(self.sprites["logo"], (50, 50))
+        self.screen.blit(self.sprites["logo"], (WINDOWWIDTH // 2 - 200, 50))
         self.all_sprites.draw(self.screen)
         pygame.display.update()
 
