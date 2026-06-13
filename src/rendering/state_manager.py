@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:48:12 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 20:17:37 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 09:44:12 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -17,6 +17,7 @@ from src.rendering.home import Home
 
 from .rendering import Renderer
 from .. import DroneNetwork
+from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
 
 class StateManager:
@@ -27,7 +28,12 @@ class StateManager:
         path: list[dict[int, tuple[int, int]]],
     ) -> None:
         pygame.init()
-        self.main_program = Renderer(drone_network, heuristic_value, path)
+        self.screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+        self.clock = pygame.time.Clock()
+
+        self.main_program = Renderer(
+            drone_network, heuristic_value, path, self.clock
+        )
         self.home_program = Home()
         self.program: State = self.home_program
 
@@ -43,7 +49,8 @@ class StateManager:
         Run the program.
         """
         while True:
-            signal = self.program.run()
+            dt = self.clock.tick(60) / 1000
+            signal = self.program.run(dt)
             if signal == 1:
                 self.quit()
                 pygame.quit()

@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 18:46:25 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 07:05:11 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -158,7 +158,7 @@ class ConnectionSprite(pygame.sprite.Sprite):
     def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
         """Transform the original position to match the screen."""
         return pos[0] * (OFFSET[0] + CELL_SIZE), pos[1] * (
-            OFFSET[0] + CELL_SIZE
+            OFFSET[1] + CELL_SIZE
         )
 
     def draw_line(self) -> None:

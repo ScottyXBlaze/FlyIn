@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:47 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 18:23:51 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 09:06:19 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,5 +14,5 @@
 
 WINDOWWIDTH, WINDOWHEIGHT = 1200, 800
 
-CELL_SIZE = 50
-OFFSET = (15, 15)
+CELL_SIZE: int = 60
+OFFSET: tuple[int, int] = (20, 1)

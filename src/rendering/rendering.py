@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 20:56:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 10:02:24 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -23,6 +23,7 @@ from .base_state import State
 from .camera import Camera
 from .drone import Drone
 from .groups import AllSprite
+from .home import Button
 from .model import ConnectionSprite, HubSprite, InfoSprite
 from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
@@ -35,6 +36,7 @@ class Renderer(State):
         drone_network: DroneNetwork,
         heuristic_value: dict[str, int | float],
         path: list[dict[int, tuple[int, int]]],
+        clock: pygame.Clock,
     ) -> None:
         """
         Everything starts here.
@@ -44,8 +46,8 @@ class Renderer(State):
         """
         # Common
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-        self.clock = pygame.time.Clock()
+        self.screen = pygame.display.get_surface()
+        self.clock = clock
         pygame.display.set_caption("FlyIn - Drone Simulator")
 
         # Camera
@@ -71,6 +73,7 @@ class Renderer(State):
 
         # Sprite groups
         self.all_sprite = AllSprite()
+
         self.ui_sprite: pygame.sprite.Group[pygame.sprite.Sprite] = (
             pygame.sprite.Group()
         )
@@ -86,6 +89,8 @@ class Renderer(State):
         self.ui_info.draw_hub_tooltip(self.drone_network.get_start_hub)
 
         self.signal = 0
+
+        self.all_buttons: dict[str, Button] = {}
 
         self.load_assets()
         self.load_hubs()
@@ -121,6 +126,7 @@ class Renderer(State):
             "ui_pos": "BackPos.png",
             "ui_main": "BackMain.png",
             "hub": "Hub.png",
+            "exit": "LittleExit.png",
         }
         for name, path in image_file.items():
             try:
@@ -132,8 +138,28 @@ class Renderer(State):
 
         self.assets["drone"] = pygame.transform.scale2x(self.assets["drone"])
         self.assets["ui_main"] = pygame.transform.scale(
-            self.assets["ui_main"], self.screen.get_size()
+            self.assets["ui_main"],
+            self.screen.get_size() if self.screen else (0, 0),
         )
+        button_file = {
+            "exit": ("LittleExit.png", (10, 20)),
+            "reset": ("LittleExit.png", (10, 90)),
+            "next": ("LittleExit.png", (10, 160)),
+            "prev": ("LittleExit.png", (10, 230)),
+            "auto": ("LittleExit.png", (10, 300)),
+            "arev": ("LittleExit.png", (10, 370)),
+        }
+        for name, path in button_file.items():
+            self.all_buttons[name] = Button(
+                path[1],
+                [
+                    pygame.image.load(
+                        os.path.join(base_dir, "assets", path[0])
+                    ).convert_alpha()
+                ],
+            )
+        for _, button in self.all_buttons.items():
+            self.ui_sprite.add(button)
 
     def load_drones(self) -> None:
         """Load every drone sprite at the initial start hub position."""
@@ -188,10 +214,12 @@ class Renderer(State):
 
     def advance_turn(self) -> None:
         """Move the drones to the next recorded turn."""
+        self.all_buttons["next"].reset()
         self.move_to_turn(self.current_turn + 1)
 
     def previous_turn(self) -> None:
         """Move the drones to the previous recorded turn."""
+        self.all_buttons["prev"].reset()
         self.move_to_turn(self.current_turn - 1)
 
     def handle_camera(self) -> None:
@@ -213,6 +241,8 @@ class Renderer(State):
                     self.advance_turn()
                 elif event.key == pygame.K_b:
                     self.previous_turn()
+                elif event.key == pygame.K_r:
+                    self.reset_game()
                 elif event.key == pygame.K_ESCAPE:
                     self.signal = 2
                 # elif event.key == pygame.K_r:
@@ -269,8 +299,8 @@ class Renderer(State):
             str: the name of the hub or None.
         """
         mouse_pos = pygame.mouse.get_pos()
-        center_x = self.screen.get_width() // 2
-        center_y = self.screen.get_height() // 2
+        center_x = WINDOWWIDTH // 2
+        center_y = WINDOWHEIGHT // 2
 
         mouse_world_x = mouse_pos[0] - center_x + self.camera.camera_x
         mouse_world_y = mouse_pos[1] - center_y + self.camera.camera_y
@@ -282,17 +312,22 @@ class Renderer(State):
 
     def reset(self):
         self.signal = 0
-        # self.current_turn = 0
-        # self.move_to_turn(-1)
+        self.all_buttons["exit"].reset()
+        self.all_buttons["next"].reset()
+        self.all_buttons["prev"].reset()
 
-    def run(self) -> int:
+    def reset_game(self) -> None:
+        self.move_to_turn(-1)
+        self.all_buttons["reset"].reset()
+
+    def run(self, dt: float) -> int:
         """Run the rendering."""
-        # Delta time
-        dt = self.clock.tick(60) / 1000
 
         # Check Event and input
         self.check_event()
         self.get_input(dt)
+        if not self.screen:
+            return 0
 
         # Show the background
         self.screen.blit(self.assets["ui_main"], (0, 0))
@@ -328,6 +363,20 @@ class Renderer(State):
         # Update everything
         self.all_sprite.update(dt)
         self.ui_sprite.update()
+        if self.all_buttons["reset"].update_sprite(dt, 1):
+            self.reset_game()
+        if self.all_buttons["next"].update_sprite(dt, 1):
+            self.advance_turn()
+        if self.all_buttons["prev"].update_sprite(dt, 1):
+            self.previous_turn()
+
+        if self.all_buttons["auto"].update_sprite(dt, 1):
+            self.advance_turn()
+
+        if self.all_buttons["arev"].update_sprite(dt, 1):
+            self.previous_turn()
+        if self.all_buttons["exit"].update_sprite(dt, 2):
+            return 2
         self.ui_sprite.draw(self.screen)
         pygame.display.update()
         return self.signal

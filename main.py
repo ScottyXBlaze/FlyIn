@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 17:10:33 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 08:52:32 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -70,6 +70,9 @@ class Main:
             sys.exit(1)
         except ValueError as e:
             print(f"[ERROR] {e}\n")
+            sys.exit(1)
+        except Exception as e:
+            print(f"[Error] Unexpected {e}")
             sys.exit(1)
 
         self.algorithm = Algorithm(self.network)
