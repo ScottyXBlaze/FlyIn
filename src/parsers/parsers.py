@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 15:44:08 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 10:37:22 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -81,6 +81,12 @@ class Parsers:
             self.parse_connection(line)
 
     def parse_nb_drones(self, line: str) -> None:
+        """
+        Get the nb of drone.
+
+        Args:
+            line (str): Description of line.
+        """
         if not line.strip().startswith("nb_drones:"):
             raise ValueError(
                 "Invalid start line (Should be nb_drones: %d)"

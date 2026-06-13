@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 08:52:32 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 11:55:40 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -60,7 +60,6 @@ class Main:
 
     def run(self) -> None:
         """Run the entire program."""
-
         try:
             self.parsers = Parsers(self.path)
             self.network = self.parsers.read_line()

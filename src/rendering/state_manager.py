@@ -6,9 +6,13 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:48:12 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 09:44:12 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 11:56:45 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
+
+"""Module that contain the state manager for the screen."""
+
+import sys
 
 import pygame
 
@@ -21,12 +25,22 @@ from .settings import WINDOWHEIGHT, WINDOWWIDTH
 
 
 class StateManager:
+    """Class to manage multiple screen or display and change them."""
+
     def __init__(
         self,
         drone_network: DroneNetwork,
         heuristic_value: dict[str, int | float],
-        path: list[dict[int, tuple[int, int]]],
+        path: list[dict[int, tuple[float, float]]],
     ) -> None:
+        """
+        Everything starts here.
+
+        Args:
+            drone_network (DroneNetwork): Class that contain every variables.
+            heuristic_value (dict[str, int]): heuristic value for each hub.
+            path (list[dict[int, tuple[int, int]]]): Path of each drone.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
         self.clock = pygame.time.Clock()
@@ -45,19 +59,17 @@ class StateManager:
             self.program = self.main_program
 
     def run(self) -> None:
-        """
-        Run the program.
-        """
+        """Run the program."""
         while True:
             dt = self.clock.tick(60) / 1000
             signal = self.program.run(dt)
             if signal == 1:
                 self.quit()
-                pygame.quit()
-                return
             elif signal == 2:
                 self.change_program()
                 self.program.reset()
 
     def quit(self) -> None:
+        """Quit the program."""
         pygame.quit()
+        sys.exit(0)

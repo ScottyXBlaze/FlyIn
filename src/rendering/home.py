@@ -6,23 +6,34 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:51:36 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 09:18:45 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 11:12:00 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
+"""Module that contain the home program."""
+
 import pygame
 import os
-from src.rendering.base_state import State
-from src.rendering.settings import WINDOWHEIGHT, WINDOWWIDTH
-from src.rendering.sprite_converter import SpriteConverter
+from .base_state import State
+from .settings import WINDOWWIDTH
+from .sprite_converter import SpriteConverter
 
 
 class Button(pygame.sprite.Sprite):
+    """Button class for every class."""
+
     def __init__(
         self,
         pos: tuple[int, int],
         frames: list[pygame.Surface],
     ) -> None:
+        """
+        Everything starts here.
+
+        Args:
+            pos (tuple[int, int]): Position of the button.
+            frames (list[pygame.Surface]): The sprites for the button.
+        """
         super().__init__()
         self.frames = frames
         self.image = self.frames[0]
@@ -34,10 +45,19 @@ class Button(pygame.sprite.Sprite):
         self.is_animated = False
 
     def animate(self) -> None:
+        """Animate the button when called."""
         self.frame_index += 1
         self.image = self.frames[self.frame_index % len(self.frames)]
 
     def time_animation(self, dt: float) -> bool:
+        """
+        Handle the time of the animation.
+
+        Args:
+            dt (float): Delta time.
+        Returns:
+            bool: True if it can animate.
+        """
         self.current_time += dt
         if self.current_time >= self.animation_time:
             self.current_time = 0
@@ -45,12 +65,14 @@ class Button(pygame.sprite.Sprite):
         return False
 
     def reset(self) -> None:
+        """Reset the button state like frame and time."""
         self.current_time = 0.0
         self.frame_index = 0
         self.is_animated = False
         self.image = self.frames[0]
 
-    def check_overed(self) -> None:
+    def check_hovered(self) -> None:
+        """Check if the button is hovered by the mouse."""
         if not self.rect:
             return
 
@@ -62,12 +84,18 @@ class Button(pygame.sprite.Sprite):
             if self.is_animated:
                 self.reset()
 
-    def click(self) -> None:
-        self.animate()
-
     def update_sprite(self, dt: float, signal: int) -> int | None:
+        """
+        Update the sprite status (should be called every frame).
+
+        Args:
+            dt (float): Delta time.
+            signal (int): Signal to return if True.
+        Returns:
+            int: The signal.
+        """
         if pygame.mouse.get_pressed()[0]:
-            self.check_overed()
+            self.check_hovered()
 
         if self.is_animated and self.time_animation(dt):
             if self.frame_index == 3:
@@ -77,7 +105,10 @@ class Button(pygame.sprite.Sprite):
 
 
 class Home(State):
+    """Home screen for the rendering."""
+
     def __init__(self) -> None:
+        """Everything starts here."""
         self.running = True
         self.sprites: dict[str, pygame.Surface] = {}
         self.frames: dict[str, list[pygame.Surface]] = {}
@@ -85,7 +116,9 @@ class Home(State):
         self.screen = pygame.display.get_surface()
         self.init_sprites()
 
-        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites: pygame.sprite.Group[pygame.sprite.Sprite] = (
+            pygame.sprite.Group()
+        )
 
         self.button_start = Button(
             (WINDOWWIDTH - 500, 50),
@@ -105,12 +138,8 @@ class Home(State):
             ).convert_alpha()
             self.background.fill((2, 62, 138))
 
-    def set_position(self) -> None:
-        self.sprites["logo"].get_frect(
-            center=(WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
-        )
-
     def init_sprites(self) -> None:
+        """Initialize every sprite for the screen."""
         sprites = {
             "logo": "logo.png",
             "exit": "ButtonExit.png",
@@ -132,6 +161,7 @@ class Home(State):
             )
 
     def check_event(self) -> None:
+        """Check different event and handle them."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.signal = 1
@@ -139,10 +169,8 @@ class Home(State):
                 if event.key == pygame.K_SPACE:
                     self.signal = 2
 
-    def update(self) -> None:
-        self.all_sprites.update()
-
     def render(self) -> None:
+        """Render surface in the screen."""
         if not self.screen:
             return
         if self.back:
@@ -153,18 +181,24 @@ class Home(State):
         pygame.display.update()
 
     def reset(self) -> None:
+        """Reset some state of the screen."""
         self.signal = 0
-        self.back = pygame.display.get_surface()
-        self.back = None if not self.back else self.back.copy()
         self.button_start.reset()
         self.button_end.reset()
 
     def run(self, dt: float) -> int:
-        self.signal = self.button_end.update_sprite(dt, 1)
-        if not self.signal:
-            self.signal = self.button_start.update_sprite(dt, 2)
+        """Run the home program (should be called every frame)."""
+        signal = self.button_end.update_sprite(dt, 1)
+        if not signal:
+            signal = 0
+            signal = self.button_start.update_sprite(dt, 2)
+            if not signal:
+                self.signal = 0
+            else:
+                self.signal = 2
+        else:
+            self.signal = signal
         self.check_event()
-        self.update()
         self.render()
 
         return self.signal if self.signal else 0

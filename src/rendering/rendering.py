@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 10:02:24 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 11:56:58 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -35,7 +35,7 @@ class Renderer(State):
         self,
         drone_network: DroneNetwork,
         heuristic_value: dict[str, int | float],
-        path: list[dict[int, tuple[int, int]]],
+        path: list[dict[int, tuple[float, float]]],
         clock: pygame.Clock,
     ) -> None:
         """
@@ -143,18 +143,18 @@ class Renderer(State):
         )
         button_file = {
             "exit": ("LittleExit.png", (10, 20)),
-            "reset": ("LittleExit.png", (10, 90)),
-            "next": ("LittleExit.png", (10, 160)),
-            "prev": ("LittleExit.png", (10, 230)),
-            "auto": ("LittleExit.png", (10, 300)),
-            "arev": ("LittleExit.png", (10, 370)),
+            "next": ("LittleExit.png", (10, 90)),
+            "prev": ("LittleExit.png", (10, 160)),
+            "auto": ("LittleExit.png", (10, 230)),
+            "arev": ("LittleExit.png", (10, 300)),
+            "reset": ("LittleExit.png", (10, 370)),
         }
-        for name, path in button_file.items():
-            self.all_buttons[name] = Button(
-                path[1],
+        for b_name, b_path in button_file.items():
+            self.all_buttons[b_name] = Button(
+                b_path[1],
                 [
                     pygame.image.load(
-                        os.path.join(base_dir, "assets", path[0])
+                        os.path.join(base_dir, "assets", b_path[0])
                     ).convert_alpha()
                 ],
             )
@@ -310,19 +310,20 @@ class Renderer(State):
                     return hub.name
         return None
 
-    def reset(self):
+    def reset(self) -> None:
+        """Reset some state of the screen."""
         self.signal = 0
         self.all_buttons["exit"].reset()
         self.all_buttons["next"].reset()
         self.all_buttons["prev"].reset()
 
     def reset_game(self) -> None:
+        """Reset the turn of the progam (game XD)."""
         self.move_to_turn(-1)
         self.all_buttons["reset"].reset()
 
     def run(self, dt: float) -> int:
         """Run the rendering."""
-
         # Check Event and input
         self.check_event()
         self.get_input(dt)
@@ -365,17 +366,15 @@ class Renderer(State):
         self.ui_sprite.update()
         if self.all_buttons["reset"].update_sprite(dt, 1):
             self.reset_game()
-        if self.all_buttons["next"].update_sprite(dt, 1):
+        elif self.all_buttons["next"].update_sprite(dt, 1) or self.all_buttons[
+            "auto"
+        ].update_sprite(dt, 1):
             self.advance_turn()
-        if self.all_buttons["prev"].update_sprite(dt, 1):
+        elif self.all_buttons["prev"].update_sprite(dt, 1) or self.all_buttons[
+            "arev"
+        ].update_sprite(dt, 1):
             self.previous_turn()
-
-        if self.all_buttons["auto"].update_sprite(dt, 1):
-            self.advance_turn()
-
-        if self.all_buttons["arev"].update_sprite(dt, 1):
-            self.previous_turn()
-        if self.all_buttons["exit"].update_sprite(dt, 2):
+        elif self.all_buttons["exit"].update_sprite(dt, 2):
             return 2
         self.ui_sprite.draw(self.screen)
         pygame.display.update()

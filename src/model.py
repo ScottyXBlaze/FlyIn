@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 14:21:33 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 10:36:41 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -153,6 +153,7 @@ class DroneNetwork(BaseModel):
 
     @model_validator(mode="after")
     def check_duplicate(self) -> Self:
+        """Check if there are some duplicate position."""
         pos_unavailable: set[tuple[int, int]] = set()
         for hub in self.hubs.values():
             if (hub.x, hub.y) in pos_unavailable:
