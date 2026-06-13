@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 11:56:58 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 14:26:19 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -35,7 +35,7 @@ class Renderer(State):
         self,
         drone_network: DroneNetwork,
         heuristic_value: dict[str, int | float],
-        path: list[dict[int, tuple[float, float]]],
+        path: list[dict[int, tuple[int, int]]],
         clock: pygame.Clock,
     ) -> None:
         """
@@ -229,6 +229,11 @@ class Renderer(State):
         self.camera.camera_y = min(self.bound[1], self.camera.camera_y)
         self.camera.camera_y = max(self.bound[3], self.camera.camera_y)
 
+    def all_reset(self) -> None:
+        """Reset all the button state."""
+        for _, button in self.all_buttons.items():
+            button.reset()
+
     def check_event(self) -> None:
         """Check some event."""
         self.handle_camera()
@@ -238,13 +243,22 @@ class Renderer(State):
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_n:
+                    self.all_reset()
                     self.advance_turn()
                 elif event.key == pygame.K_b:
+                    self.all_reset()
                     self.previous_turn()
                 elif event.key == pygame.K_r:
+                    self.all_reset()
                     self.reset_game()
                 elif event.key == pygame.K_ESCAPE:
                     self.signal = 2
+                elif event.key == pygame.K_j:
+                    self.all_reset()
+                    self.all_buttons["auto"].is_working = True
+                elif event.key == pygame.K_h:
+                    self.all_reset()
+                    self.all_buttons["arev"].is_working = True
                 # elif event.key == pygame.K_r:
                 # self.run_to_end()
 

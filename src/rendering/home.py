@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:51:36 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 11:12:00 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 14:23:28 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -42,7 +42,7 @@ class Button(pygame.sprite.Sprite):
         self.frame_index = 0
         self.animation_time = 0.02
         self.current_time = 0.0
-        self.is_animated = False
+        self.is_working = False
 
     def animate(self) -> None:
         """Animate the button when called."""
@@ -68,7 +68,7 @@ class Button(pygame.sprite.Sprite):
         """Reset the button state like frame and time."""
         self.current_time = 0.0
         self.frame_index = 0
-        self.is_animated = False
+        self.is_working = False
         self.image = self.frames[0]
 
     def check_hovered(self) -> None:
@@ -79,9 +79,9 @@ class Button(pygame.sprite.Sprite):
         mouse_pos = pygame.mouse.get_pos()
 
         if self.rect.collidepoint(mouse_pos):
-            self.is_animated = True
+            self.is_working = True
         else:
-            if self.is_animated:
+            if self.is_working:
                 self.reset()
 
     def update_sprite(self, dt: float, signal: int) -> int | None:
@@ -97,7 +97,7 @@ class Button(pygame.sprite.Sprite):
         if pygame.mouse.get_pressed()[0]:
             self.check_hovered()
 
-        if self.is_animated and self.time_animation(dt):
+        if self.is_working and self.time_animation(dt):
             if self.frame_index == 3:
                 return signal
             self.animate()
@@ -110,6 +110,7 @@ class Home(State):
     def __init__(self) -> None:
         """Everything starts here."""
         self.running = True
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.sprites: dict[str, pygame.Surface] = {}
         self.frames: dict[str, list[pygame.Surface]] = {}
         self.signal = 0
@@ -137,6 +138,7 @@ class Home(State):
                 self.screen.get_frect().size
             ).convert_alpha()
             self.background.fill((2, 62, 138))
+        # self.activation_music = pygame.mixer.music.load(self.base_dir)
 
     def init_sprites(self) -> None:
         """Initialize every sprite for the screen."""
@@ -145,10 +147,9 @@ class Home(State):
             "exit": "ButtonExit.png",
             "start": "ButtonStart.png",
         }
-        base_dir = os.path.dirname(os.path.abspath(__file__))
         for name, path in sprites.items():
             self.sprites[name] = pygame.image.load(
-                os.path.join(base_dir, "assets", path)
+                os.path.join(self.base_dir, "assets", path)
             )
         for name, sprite in self.sprites.items():
             self.sprites[name] = pygame.transform.scale2x(sprite)
@@ -167,7 +168,9 @@ class Home(State):
                 self.signal = 1
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    self.signal = 2
+                    self.button_start.is_working = True
+                elif event.key == pygame.K_ESCAPE:
+                    self.button_end.is_working = True
 
     def render(self) -> None:
         """Render surface in the screen."""

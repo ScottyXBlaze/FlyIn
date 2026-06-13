@@ -6,12 +6,13 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:48:12 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 11:56:45 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 14:26:02 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the state manager for the screen."""
 
+import os
 import sys
 
 import pygame
@@ -31,7 +32,7 @@ class StateManager:
         self,
         drone_network: DroneNetwork,
         heuristic_value: dict[str, int | float],
-        path: list[dict[int, tuple[float, float]]],
+        path: list[dict[int, tuple[int, int]]],
     ) -> None:
         """
         Everything starts here.
@@ -44,6 +45,12 @@ class StateManager:
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
         self.clock = pygame.time.Clock()
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        pygame.mixer.music.load(
+            os.path.join(base_dir, "assets", "music", "Clouds.ogg")
+        )
+        pygame.mixer.music.play(-1)
 
         self.main_program = Renderer(
             drone_network, heuristic_value, path, self.clock

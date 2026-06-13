@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/12 14:25:26 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/13 14:25:51 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -37,7 +37,7 @@ class Algorithm:
         self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
 
         # Variable to store the result
-        self.result: list[tuple[int, tuple[int, int]]] = []
+        self.result: list[tuple[int, tuple[float, float]]] = []
 
     def set_drones(self) -> list[Drone]:
         """
@@ -110,7 +110,7 @@ class Algorithm:
 
     def moove_drone(
         self, drone: Drone, new_hub: Hub, old_hub: Hub
-    ) -> tuple[str, tuple[int, int]]:
+    ) -> tuple[str, tuple[float, float]]:
         """
         Move a drone to a specific hub | connection.
 
@@ -141,10 +141,16 @@ class Algorithm:
                 drone.target_connection = connection
                 drone.target_connection.add_drone()
                 drone.target_hub = new_hub
+                new_x, new_y = new_hub.get_position
+                old_x, old_y = old_hub.get_position
 
+                new_pos: tuple[float, float] = (
+                    (new_x + old_x) / 2,
+                    (new_y + old_y) / 2,
+                )
                 return (
                     f"D{drone.id}-{old_hub.name}-{new_hub.name}",
-                    new_hub.get_position,
+                    new_pos,
                 )
             else:
                 if (
