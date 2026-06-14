@@ -35,6 +35,7 @@ class Algorithm:
         self.h_value = ReverseDijkstra.calculate_heuristic(drone_network)
         self.drones: list[Drone] = self.set_drones()
         self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
+        self.edge_usage: dict[tuple[str, str], int] = {}
 
         # Variable to store the result
         self.result: list[tuple[int, tuple[float, float]]] = []
@@ -61,9 +62,8 @@ class Algorithm:
         Returns:
             Hub: Description of return value.
         """
-        best_neighbor: list[Hub] = []
-        min_h = float("inf")
         current_h = self.h_value.get(hub_name, float("inf"))
+        candidates: list[tuple[tuple[float, int, int, int, int, str], Hub]] = []
 
         for hub in self.drone_network.get_neighbors(hub_name):
             hub_h = self.h_value.get(hub.name, float("inf"))
@@ -83,16 +83,44 @@ class Algorithm:
             ):
                 continue
 
-            if hub_h < min_h:
-                min_h = hub_h
-                best_neighbor = [hub]
-            elif hub_h == min_h:
-                best_neighbor.append(hub)
+            edge_key = (hub_name, hub.name)
+            usage = self.edge_usage.get(edge_key, 0)
 
-        for neighbor in best_neighbor:
-            if neighbor and min_h < current_h:
-                return neighbor
-        return None
+            zone_rank = {
+                ZoneType.priority: 0,
+                ZoneType.normal: 1,
+                ZoneType.restricted: 2,
+                ZoneType.blocked: 3,
+            }[hub.metadata.zone]
+
+            # Keep the shortest path preference, but add a small load-aware
+            # penalty so parallel branches get used more evenly.
+            score = (
+                float(hub_h)
+                + (usage * 1.5)
+                + (hub.current_drone / hub.metadata.max_drones)
+                + (connection.current_drone / connection.max_link_capacity)
+                + (zone_rank * 0.05)
+            )
+            candidates.append(
+                (
+                    (
+                        score,
+                        usage,
+                        hub.current_drone,
+                        connection.current_drone,
+                        zone_rank,
+                        hub.name,
+                    ),
+                    hub,
+                )
+            )
+
+        if not candidates:
+            return None
+
+        candidates.sort(key=lambda item: item[0])
+        return candidates[0][1]
 
     def get_hub_by_pos(self, pos: tuple[int, int]) -> Hub | None:
         """
@@ -236,6 +264,10 @@ class Algorithm:
                     result.append(move)
                     self.result.append((turn, position))
                     moved_this_turn.add(drone.id)
+                    edge_key = (current_hub.name, closest_neighbor.name)
+                    self.edge_usage[edge_key] = (
+                        self.edge_usage.get(edge_key, 0) + 1
+                    )
 
             # Remove drone that reach the end
             for drone in drones_to_remove:

@@ -202,6 +202,16 @@ class Renderer(State):
             return
 
         turn_positions = self.drone_positions[turn_index]
+        previous_positions = (
+            self.drone_positions[turn_index - 1]
+            if turn_index > 0
+            else {}
+        )
+        next_positions = (
+            self.drone_positions[turn_index + 1]
+            if turn_index + 1 < len(self.drone_positions)
+            else {}
+        )
 
         for drone_id, drone in self.drones.items():
             position = turn_positions.get(drone_id, self.end_pos)
@@ -209,7 +219,17 @@ class Renderer(State):
                 position = self.end_pos
             elif drone_id not in turn_positions:
                 position = self.end_pos
-            if drone.position != position or drone.is_moving:
+            previous_position = previous_positions.get(drone_id)
+            next_position = next_positions.get(drone_id)
+
+            if (
+                previous_position == position
+                and next_position is not None
+                and next_position != position
+                and position not in {self.start_pos, self.end_pos}
+            ):
+                drone.move_to_midpoint(position, next_position)
+            elif drone.position != position or drone.is_moving:
                 drone.move_to(position)
 
     def advance_turn(self) -> None:

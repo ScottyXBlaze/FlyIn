@@ -144,6 +144,26 @@ class Drone(pygame.sprite.Sprite):
         self._anim_active = True
         self.grid_pos = dest
 
+    def move_to_midpoint(
+        self,
+        start: tuple[int, int],
+        end: tuple[int, int],
+    ) -> None:
+        """
+        Place the drone in the middle of two hubs.
+
+        Args:
+            start (tuple[int, int]): The first hub position.
+            end (tuple[int, int]): The second hub position.
+        """
+        sx, sy = self.grid_to_px(*start, self.pixel_offset)
+        ex, ey = self.grid_to_px(*end, self.pixel_offset)
+        self._anim_start = (self.px, self.py)
+        self._anim_end = ((sx + ex) / 2, (sy + ey) / 2)
+        self._anim_elapsed = 0.0
+        self._anim_active = True
+        self.grid_pos = start
+
     def update(self, dt: float) -> None:
         """
         Update the state of the drone.
@@ -151,13 +171,14 @@ class Drone(pygame.sprite.Sprite):
         Args:
             dt (float): delta time.
         """
-        # Animate the drone
+        # Animate the drone sprite all the time, movement only when needed.
         self._frame_elapsed += dt
         if self._frame_elapsed >= self._frame_speed:
             self._frame_elapsed %= self._frame_speed
             self._sync_sprite()
 
         if not self._anim_active:
+            self.rect.center = (self.px, self.py)
             return
 
         self._anim_elapsed += dt
@@ -167,13 +188,12 @@ class Drone(pygame.sprite.Sprite):
         ex, ey = self._anim_end
         self.px = sx + (ex - sx) * t
         self.py = sy + (ey - sy) * t
-        if self.rect and self.rect.center:
-            self.rect.center = (self.px, self.py)
+        self.rect.center = (self.px, self.py)
 
-            if self._anim_elapsed >= self._anim_speed:
-                self.px, self.py = self._anim_end
-                self._anim_active = False
-                self.rect.center = self._anim_end
+        if self._anim_elapsed >= self._anim_speed:
+            self.px, self.py = self._anim_end
+            self._anim_active = False
+            self.rect.center = self._anim_end
 
     @property
     def is_moving(self) -> bool:
