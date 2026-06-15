@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 10:38:23 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 14:30:25 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 10:53:58 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -144,26 +144,6 @@ class Drone(pygame.sprite.Sprite):
         self._anim_active = True
         self.grid_pos = dest
 
-    def move_to_midpoint(
-        self,
-        start: tuple[int, int],
-        end: tuple[int, int],
-    ) -> None:
-        """
-        Place the drone in the middle of two hubs.
-
-        Args:
-            start (tuple[int, int]): The first hub position.
-            end (tuple[int, int]): The second hub position.
-        """
-        sx, sy = self.grid_to_px(*start, self.pixel_offset)
-        ex, ey = self.grid_to_px(*end, self.pixel_offset)
-        self._anim_start = (self.px, self.py)
-        self._anim_end = ((sx + ex) / 2, (sy + ey) / 2)
-        self._anim_elapsed = 0.0
-        self._anim_active = True
-        self.grid_pos = start
-
     def update(self, dt: float) -> None:
         """
         Update the state of the drone.
@@ -176,6 +156,9 @@ class Drone(pygame.sprite.Sprite):
         if self._frame_elapsed >= self._frame_speed:
             self._frame_elapsed %= self._frame_speed
             self._sync_sprite()
+
+        if not self.rect:
+            return
 
         if not self._anim_active:
             self.rect.center = (self.px, self.py)

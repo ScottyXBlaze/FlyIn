@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:51:36 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 15:54:19 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 10:29:14 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -40,7 +40,7 @@ class Button(pygame.sprite.Sprite):
         self.rect = self.image.get_frect(topleft=pos)
 
         self.frame_index = 0
-        self.animation_time = 0.02
+        self.animation_time = 0.017
         self.current_time = 0.0
         self.is_working = False
 

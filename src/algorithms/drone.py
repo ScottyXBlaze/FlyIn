@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/08 19:53:37 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/10 16:26:20 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 10:54:20 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -20,7 +20,7 @@ from .. import Vector2
 class Drone:
     """Main class for every drone."""
 
-    def __init__(self, id: int) -> None:
+    def __init__(self, id: int, pos: tuple[int, int]) -> None:
         """
         Everything starts here.
 
@@ -28,7 +28,7 @@ class Drone:
             id (int): The id of the drone.
         """
         self.id = id
-        self._position = Vector2()
+        self._position = Vector2(pos)
         self.is_in_connection: bool = False
         self.target_hub: Hub | None = None
         self.target_connection: Connection | None = None

@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 14:25:51 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 10:54:47 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -48,8 +48,9 @@ class Algorithm:
             list[Drone]: List of the drone.
         """
         drones = []
+        start_pos = self.drone_network.get_start_hub.get_position
         for i in range(1, self.drone_network.nb_drones + 1):
-            drones.append(Drone(i))
+            drones.append(Drone(i, start_pos))
         return drones
 
     def get_closest_neighbor(self, hub_name: str) -> Hub | None:
@@ -62,8 +63,12 @@ class Algorithm:
         Returns:
             Hub: Description of return value.
         """
+        # current minimum Heuristic value
         current_h = self.h_value.get(hub_name, float("inf"))
-        candidates: list[tuple[tuple[float, int, int, int, int, str], Hub]] = []
+
+        candidates: list[tuple[tuple[float, int, int, int, int, str], Hub]] = (
+            []
+        )
 
         for hub in self.drone_network.get_neighbors(hub_name):
             hub_h = self.h_value.get(hub.name, float("inf"))

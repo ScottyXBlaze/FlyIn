@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 14:26:19 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 13:19:21 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -17,6 +17,8 @@ import random
 import sys
 
 import pygame
+
+from src.rendering.sprite_converter import SpriteConverter
 
 from .. import DroneNetwork
 from .base_state import State
@@ -126,7 +128,7 @@ class Renderer(State):
             "ui_pos": "BackPos.png",
             "ui_main": "BackMain.png",
             "hub": "Hub.png",
-            "exit": "LittleExit.png",
+            "exit": "ButtonLExit.png",
         }
         for name, path in image_file.items():
             try:
@@ -142,22 +144,19 @@ class Renderer(State):
             self.screen.get_size() if self.screen else (0, 0),
         )
         button_file = {
-            "exit": ("LittleExit.png", (10, 20)),
-            "next": ("LittleExit.png", (10, 90)),
-            "prev": ("LittleExit.png", (10, 160)),
-            "auto": ("LittleExit.png", (10, 230)),
-            "arev": ("LittleExit.png", (10, 300)),
-            "reset": ("LittleExit.png", (10, 370)),
+            "exit": ("ButtonLExit.png", (10, 20)),
+            "next": ("ButtonLNext.png", (10, 90)),
+            "prev": ("ButtonLPrevious.png", (10, 160)),
+            "auto": ("ButtonLAuto.png", (10, 230)),
+            "arev": ("ButtonLArev.png", (10, 300)),
+            "reset": ("ButtonLReset.png", (10, 370)),
         }
         for b_name, b_path in button_file.items():
-            self.all_buttons[b_name] = Button(
-                b_path[1],
-                [
-                    pygame.image.load(
-                        os.path.join(base_dir, "assets", b_path[0])
-                    ).convert_alpha()
-                ],
-            )
+            image = pygame.image.load(
+                os.path.join(base_dir, "assets", b_path[0])
+            ).convert_alpha()
+            tmp = SpriteConverter().convert_sprite(image, (1, 3))
+            self.all_buttons[b_name] = Button(b_path[1], tmp)
         for _, button in self.all_buttons.items():
             self.ui_sprite.add(button)
 
@@ -202,16 +201,6 @@ class Renderer(State):
             return
 
         turn_positions = self.drone_positions[turn_index]
-        previous_positions = (
-            self.drone_positions[turn_index - 1]
-            if turn_index > 0
-            else {}
-        )
-        next_positions = (
-            self.drone_positions[turn_index + 1]
-            if turn_index + 1 < len(self.drone_positions)
-            else {}
-        )
 
         for drone_id, drone in self.drones.items():
             position = turn_positions.get(drone_id, self.end_pos)
@@ -219,23 +208,14 @@ class Renderer(State):
                 position = self.end_pos
             elif drone_id not in turn_positions:
                 position = self.end_pos
-            previous_position = previous_positions.get(drone_id)
-            next_position = next_positions.get(drone_id)
 
-            if (
-                previous_position == position
-                and next_position is not None
-                and next_position != position
-                and position not in {self.start_pos, self.end_pos}
-            ):
-                drone.move_to_midpoint(position, next_position)
-            elif drone.position != position or drone.is_moving:
+            if drone.position != position or drone.is_moving:
                 drone.move_to(position)
 
     def advance_turn(self) -> None:
         """Move the drones to the next recorded turn."""
-        self.all_buttons["next"].reset()
         self.move_to_turn(self.current_turn + 1)
+        self.all_buttons["next"].reset()
 
     def previous_turn(self) -> None:
         """Move the drones to the previous recorded turn."""
@@ -265,22 +245,20 @@ class Renderer(State):
                 if event.key == pygame.K_n:
                     self.all_reset()
                     self.advance_turn()
-                elif event.key == pygame.K_b:
+                elif event.key == pygame.K_p:
                     self.all_reset()
                     self.previous_turn()
                 elif event.key == pygame.K_r:
                     self.all_reset()
                     self.reset_game()
-                elif event.key == pygame.K_ESCAPE:
-                    self.signal = 2
-                elif event.key == pygame.K_j:
+                elif event.key == pygame.K_a:
                     self.all_reset()
                     self.all_buttons["auto"].is_working = True
-                elif event.key == pygame.K_h:
+                elif event.key == pygame.K_x:
                     self.all_reset()
                     self.all_buttons["arev"].is_working = True
-                # elif event.key == pygame.K_r:
-                # self.run_to_end()
+                elif event.key == pygame.K_q:
+                    self.all_buttons["exit"].is_working = True
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -310,10 +288,10 @@ class Renderer(State):
         """
         keys = pygame.key.get_pressed()
         self.camera.camera_x += int(
-            200 * delta * (keys[pygame.K_d] - keys[pygame.K_a])
+            200 * delta * (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT])
         )
         self.camera.camera_y += int(
-            200 * delta * (keys[pygame.K_s] - keys[pygame.K_w])
+            200 * delta * (keys[pygame.K_DOWN] - keys[pygame.K_UP])
         )
 
         if keys[pygame.K_q]:

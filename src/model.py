@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 10:36:41 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 18:26:28 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -199,10 +199,10 @@ class DroneNetwork(BaseModel):
 class Vector2:
     """Simple 2D vector class."""
 
-    def __init__(self) -> None:
+    def __init__(self, pos: tuple[int, int] = (0, 0)) -> None:
         """Everything starts here."""
-        self.x = 0
-        self.y = 0
+        self.x = pos[0]
+        self.y = pos[1]
 
     def set_position(self, x: int, y: int) -> None:
         """
