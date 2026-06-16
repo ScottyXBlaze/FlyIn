@@ -6,13 +6,11 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 18:35:09 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 19:24:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the parser of the program."""
-
-import importlib
 
 from typing import Any
 from .. import Connection, DroneNetwork, Hub
@@ -34,6 +32,12 @@ class Parsers:
         self.connections: dict[str, set[str]] = {}
         self.raw_connections: dict[str, Connection] = {}
 
+        self.checker: dict[str, bool] = {
+            "nb_drones": False,
+            "start_hub": False,
+            "end_hub": False
+        }
+
     def read_line(self) -> DroneNetwork:
         """
         Read the file and return the parsed file.
@@ -46,13 +50,14 @@ class Parsers:
 
             # Check that the first argument is always the nb of drone
             line = file.readline().strip()
-            while line.startswith("#") or line.isspace() or line == "":
+            while line.startswith("#") or not line:
                 line = file.readline().strip()
-                pass
 
             self.parse_nb_drones(line)
+            self.checker["nb_drones"] = True
             for line in file:
-                self.parse_line(line)
+                self.parse_line(line.strip())
+
         self.raw_data.update(
             {
                 "hubs": self.hubs,
@@ -60,6 +65,11 @@ class Parsers:
                 "raw_connection": self.raw_connections,
             }
         )
+
+        variables = list(filter(lambda x: not self.checker[x], self.checker))
+        if variables:
+            raise ValueError(f"Missing variables: {", ".join(variables)}")
+
         return DroneNetwork.model_validate(self.raw_data)
 
     def parse_line(self, line: str) -> None:
@@ -69,16 +79,26 @@ class Parsers:
         Args:
             line (str): The line to parse.
         """
-        args = line.split(" ")
-        if line.strip().startswith("hub: "):
+        line = line.strip()
+        if line.startswith("hub: "):
             self.parse_hub(line)
-        elif line.strip().startswith("start_hub: "):
+        elif line.startswith("start_hub: "):
+            args = line.split()
             self.raw_data["start_hub"] = args[1]
+            if not self.checker["start_hub"]:
+                self.checker["start_hub"] = True
+            else:
+                raise ValueError("Duplicate start_hub")
             self.parse_hub(line)
-        elif line.strip().startswith("end_hub: "):
+        elif line.startswith("end_hub: "):
+            args = line.split()
             self.raw_data["end_hub"] = args[1]
+            if not self.checker["end_hub"]:
+                self.checker["end_hub"] = True
+            else:
+                raise ValueError("Duplicate end_hub")
             self.parse_hub(line)
-        elif line.strip().startswith("connection: "):
+        elif line.startswith("connection: "):
             self.parse_connection(line)
 
     def parse_nb_drones(self, line: str) -> None:
@@ -94,7 +114,7 @@ class Parsers:
                 + f" Got '{line}'"
             )
         else:
-            key, value = line.split(" ", 1)
+            key, value = line.split(maxsplit=1)
             self.raw_data[key[:-1]] = value
 
     def parse_connection(self, line: str) -> None:
@@ -104,7 +124,7 @@ class Parsers:
         Args:
             line (str): The line to parse.
         """
-        args = line.split(" ", 2)
+        args = line.split(maxsplit=2)
 
         if len(args) < 2:
             raise ValueError("Invalid connection value")
@@ -162,9 +182,14 @@ class Parsers:
         Args:
             line (str): The line to parse.
         """
-        args = line.strip().split(" ", 4)
+        args = line.strip().split(maxsplit=4)
+
         if len(args) < 4:
             raise ValueError(f"Invalid hub {line}")
+
+        if args[0] not in {"hub:", "start_hub:", "end_hub:"}:
+            raise ValueError(f"Invalid index {args[0]} in {line}")
+
         name = args[1]
         x = args[2]
         y = args[3]
@@ -210,9 +235,17 @@ class Parsers:
             dict: The dictionnary that contain the parsed metadata.
         """
         config = {}
+        metadata = metadata.strip()
+
+        if not metadata.startswith("[") or not metadata.endswith("]"):
+            raise ValueError(f"Invalid metadata '{metadata}'")
+
         args = metadata[1:-1]
-        for arg in args.split(" "):
-            name, value = arg.split("=")
+        for arg in args.split():
+            tmp = arg.split("=")
+            if len(tmp) != 2:
+                raise ValueError(f"Invalid metadata '{arg}'")
+            name, value= tmp
             if name not in {"color", "zone", "max_drones"}:
                 raise ValueError("Invalid metadata arguments")
             else:

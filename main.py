@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 18:38:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 18:40:46 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -15,6 +15,7 @@
 import importlib
 
 import sys
+
 
 def print_error() -> None:
     """Print an error and usage message."""
@@ -30,7 +31,14 @@ make run MAP=<mapfile>
 """
     )
 
+
 def check_dependencies() -> bool:
+    """
+    Check every depedencies to run the program.
+
+    Returns:
+        bool: True if every dependencies is installed.
+    """
     dependencies = {
         "pygame",
         "pydantic",
@@ -43,13 +51,12 @@ def check_dependencies() -> bool:
             return False
     return True
 
+
 if not check_dependencies():
     print("[Error] Missing dependencies")
     print_error()
     sys.exit(1)
-from src import Parsers, Algorithm, StateManager # noqa: E402
-
-
+from src import Parsers, Algorithm, StateManager  # noqa: E402
 
 
 class Main:
@@ -81,6 +88,7 @@ class Main:
     def run(self) -> None:
         """Run the entire program."""
         from pydantic import ValidationError
+
         try:
             parsers = Parsers(self.path)
             network = parsers.read_line()
@@ -113,7 +121,6 @@ class Main:
 
 
 if __name__ == "__main__":
-
 
     if not check_dependencies():
         print("[Error] Missing dependencies")

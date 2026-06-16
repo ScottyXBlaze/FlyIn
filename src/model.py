@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 18:26:28 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/15 19:26:47 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -58,8 +58,8 @@ class Hub(BaseModel):
     """Basic Hub class."""
 
     name: str
-    x: int = Field(ge=-1000, le=1000)
-    y: int = Field(ge=-1000, le=1000)
+    x: int = Field()
+    y: int = Field()
     metadata: Metadata = Field(default=Metadata())
     current_drone: int = Field(default=0)
 
@@ -134,7 +134,7 @@ class Connection(BaseModel):
 class DroneNetwork(BaseModel):
     """DroneNetwork Class."""
 
-    nb_drones: int = Field(gt=0, le=1000)
+    nb_drones: int = Field(gt=0)
     start_hub: str = Field(default="")
     end_hub: str = Field(default="")
     hubs: dict[str, Hub] = Field(default_factory=dict)
