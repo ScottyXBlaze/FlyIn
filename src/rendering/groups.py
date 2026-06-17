@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:40 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/11 15:52:21 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 10:55:41 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -66,14 +66,7 @@ class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
             self.hub_layout,
             self.drone_layout,
         ]:
-            for sprite in sorted(
-                layout,
-                key=lambda sprite: (
-                    sprite.rect.centery
-                    if isinstance(sprite.rect, pygame.Rect | pygame.FRect)
-                    else (0, 0)
-                ),
-            ):
+            for sprite in layout:
                 if isinstance(
                     sprite.rect, pygame.Rect | pygame.FRect
                 ) and isinstance(sprite.image, pygame.Surface):

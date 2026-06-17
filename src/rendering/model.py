@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 07:05:11 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 17:56:22 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -36,8 +36,7 @@ class HubSprite(pygame.sprite.Sprite):
         Every initialization.
 
         Args:
-            pos (tuple[int, int]): Position of the hub.
-            color (str): Color of the hub.
+            pos (tuple[int, int]): Position of the hub. color (str): Color of the hub.
             name (str): Name of the Hub.
         """
         super().__init__()
@@ -206,9 +205,11 @@ class InfoSprite(pygame.sprite.Sprite):
             drone_network: The DroneNetwork class.
         """
         super().__init__()
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.frames = SpriteConverter().convert_sprite(
-            pygame.image.load(os.path.join(base_dir, "assets", sprite_name)),
+            pygame.image.load(
+                os.path.join(self.base_dir, "assets", sprite_name)
+            ),
             (3, 3),
         )
         self.frame_size = self.frames[0].size
@@ -220,8 +221,8 @@ class InfoSprite(pygame.sprite.Sprite):
         ).convert_alpha()
         self.image.fill((0, 0, 0, 10))
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.fonts = os.path.join(base_dir, "assets", "JetBrainsMono.ttf")
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.fonts = os.path.join(self.base_dir, "assets", "JetBrainsMono.ttf")
         self.font = pygame.font.Font(self.fonts, 15)
 
         self.drone_network = drone_network
@@ -304,11 +305,12 @@ class InfoSprite(pygame.sprite.Sprite):
         image_size = self.image.get_size()
         position_x = [i for i in range(25, image_size[0], image_size[0] // 3)]
         position_y = [i for i in range(20, image_size[1], image_size[1] // 4)]
+
         # Print every text in their position
         self.image.blit(text_surfaces[0], (position_x[0], position_y[0]))
         self.image.blit(text_surfaces[1], (position_x[0], position_y[1]))
         self.image.blit(text_surfaces[2], (position_x[1], position_y[0]))
         self.image.blit(text_surfaces[3], (position_x[1], position_y[1]))
-        self.image.blit(text_surfaces[4], (position_x[2], position_y[0]))
-        self.image.blit(text_surfaces[6], (position_x[2], position_y[1]))
+        self.image.blit(text_surfaces[4], (position_x[2], position_y[1]))
+        self.image.blit(text_surfaces[6], (position_x[2], position_y[0]))
         self.image.blit(text_surfaces[7], (position_x[0], position_y[2]))

@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 10:38:23 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 10:53:58 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 14:05:27 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -57,7 +57,7 @@ class Drone(pygame.sprite.Sprite):
         self.px, self.py = self.grid_to_px(*position, self.pixel_offset)
 
         # Animation variable
-        self._anim_speed: float = 0.2
+        self._anim_speed: float = 0.3
         self._anim_active: bool = False
         self._anim_elapsed: float = 0.0
 

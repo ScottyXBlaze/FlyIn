@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 18:40:46 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 17:35:59 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -19,8 +19,7 @@ import sys
 
 def print_error() -> None:
     """Print an error and usage message."""
-    print(
-        """
+    print("""
 ==== Usage ====
 
 [Using the python file]
@@ -28,8 +27,7 @@ uv run python3 main.py <mapfile>
 
 [Using the Makefile]
 make run MAP=<mapfile>
-"""
-    )
+""")
 
 
 def check_dependencies() -> bool:

@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:50:02 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 13:19:21 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 16:44:31 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -18,8 +18,6 @@ import sys
 
 import pygame
 
-from src.rendering.sprite_converter import SpriteConverter
-
 from .. import DroneNetwork
 from .base_state import State
 from .camera import Camera
@@ -28,6 +26,7 @@ from .groups import AllSprite
 from .home import Button
 from .model import ConnectionSprite, HubSprite, InfoSprite
 from .settings import WINDOWHEIGHT, WINDOWWIDTH
+from .sprite_converter import SpriteConverter
 
 
 class Renderer(State):
@@ -94,6 +93,17 @@ class Renderer(State):
 
         self.all_buttons: dict[str, Button] = {}
 
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        self.hub_sfx = pygame.mixer.Sound(
+            os.path.join(self.base_dir, "assets", "music", "ButtonClick.mp3")
+        )
+        self.hub_sfx.set_volume(0.3)
+        self.button_sfx = pygame.mixer.Sound(
+            os.path.join(self.base_dir, "assets", "music", "ButtonSFX.mp3")
+        )
+        self.button_sfx.set_volume(0.3)
+
         self.load_assets()
         self.load_hubs()
         self.load_connections()
@@ -121,7 +131,6 @@ class Renderer(State):
 
     def load_assets(self) -> None:
         """Load every assets."""
-        base_dir = os.path.dirname(os.path.abspath(__file__))
         image_file = {
             "drone": "drone.png",
             "ui": "BackUI.png",
@@ -132,7 +141,7 @@ class Renderer(State):
         }
         for name, path in image_file.items():
             try:
-                path = os.path.join(base_dir, "assets", path)
+                path = os.path.join(self.base_dir, "assets", path)
                 self.assets[name] = pygame.image.load(path).convert_alpha()
             except pygame.error as e:
                 print(e)
@@ -153,10 +162,10 @@ class Renderer(State):
         }
         for b_name, b_path in button_file.items():
             image = pygame.image.load(
-                os.path.join(base_dir, "assets", b_path[0])
+                os.path.join(self.base_dir, "assets", b_path[0])
             ).convert_alpha()
             tmp = SpriteConverter().convert_sprite(image, (1, 3))
-            self.all_buttons[b_name] = Button(b_path[1], tmp)
+            self.all_buttons[b_name] = Button(b_path[1], tmp, self.button_sfx)
         for _, button in self.all_buttons.items():
             self.ui_sprite.add(button)
 
@@ -243,21 +252,27 @@ class Renderer(State):
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_n:
+                    self.button_sfx.play()
                     self.all_reset()
                     self.advance_turn()
                 elif event.key == pygame.K_p:
+                    self.button_sfx.play()
                     self.all_reset()
                     self.previous_turn()
                 elif event.key == pygame.K_r:
+                    self.button_sfx.play()
                     self.all_reset()
                     self.reset_game()
                 elif event.key == pygame.K_a:
+                    self.button_sfx.play()
                     self.all_reset()
                     self.all_buttons["auto"].is_working = True
                 elif event.key == pygame.K_x:
+                    self.button_sfx.play()
                     self.all_reset()
                     self.all_buttons["arev"].is_working = True
                 elif event.key == pygame.K_q:
+                    self.button_sfx.play()
                     self.all_buttons["exit"].is_working = True
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -301,6 +316,7 @@ class Renderer(State):
         """Check if we need to show the UI or not."""
         hub = self.check_over_pos()
         if hub is not None:
+            self.hub_sfx.play()
             self.ui_info.draw_hub_tooltip(self.drone_network.hubs.get(hub))
 
     def check_over_pos(self) -> str | None:
@@ -374,8 +390,7 @@ class Renderer(State):
             self.check_for_ui()
 
         # Update everything
-        self.all_sprite.update(dt)
-        self.ui_sprite.update()
+
         if self.all_buttons["reset"].update_sprite(dt, 1):
             self.reset_game()
         elif self.all_buttons["next"].update_sprite(dt, 1) or self.all_buttons[
@@ -388,6 +403,8 @@ class Renderer(State):
             self.previous_turn()
         elif self.all_buttons["exit"].update_sprite(dt, 2):
             return 2
+        self.all_sprite.update(dt)
+        self.ui_sprite.update()
         self.ui_sprite.draw(self.screen)
         pygame.display.update()
         return self.signal

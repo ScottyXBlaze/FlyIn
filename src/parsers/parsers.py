@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 19:24:33 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 18:08:27 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -35,7 +35,7 @@ class Parsers:
         self.checker: dict[str, bool] = {
             "nb_drones": False,
             "start_hub": False,
-            "end_hub": False
+            "end_hub": False,
         }
 
     def read_line(self) -> DroneNetwork:
@@ -49,12 +49,16 @@ class Parsers:
         with open(self.path) as file:
 
             # Check that the first argument is always the nb of drone
-            line = file.readline().strip()
-            while line.startswith("#") or not line:
-                line = file.readline().strip()
+            for line in file:
+                if line.startswith("#") or not line:
+                    continue
+                else:
+                    self.parse_nb_drones(line)
+                    self.checker["nb_drones"] = True
+                    break
+            else:
+                raise ValueError("No readable line")
 
-            self.parse_nb_drones(line)
-            self.checker["nb_drones"] = True
             for line in file:
                 self.parse_line(line.strip())
 
@@ -80,8 +84,12 @@ class Parsers:
             line (str): The line to parse.
         """
         line = line.strip()
-        if line.startswith("hub: "):
+
+        if not line or line.startswith("#"):
+            pass
+        elif line.startswith("hub: "):
             self.parse_hub(line)
+
         elif line.startswith("start_hub: "):
             args = line.split()
             self.raw_data["start_hub"] = args[1]
@@ -90,6 +98,7 @@ class Parsers:
             else:
                 raise ValueError("Duplicate start_hub")
             self.parse_hub(line)
+
         elif line.startswith("end_hub: "):
             args = line.split()
             self.raw_data["end_hub"] = args[1]
@@ -98,8 +107,12 @@ class Parsers:
             else:
                 raise ValueError("Duplicate end_hub")
             self.parse_hub(line)
+
         elif line.startswith("connection: "):
             self.parse_connection(line)
+
+        else:
+            raise ValueError(f"Invalid line '{line}'")
 
     def parse_nb_drones(self, line: str) -> None:
         """
@@ -135,6 +148,9 @@ class Parsers:
             raise ValueError("Invalid connection value")
 
         hub1, hub2 = sorted([i.strip() for i in connection])
+        if hub1 not in self.hubs.keys() or hub2 not in self.hubs.keys():
+            raise ValueError(f"Hub {hub1} or {hub2} not defined yet")
+
         for hub in [hub1, hub2]:
             if hub not in self.connections:
                 self.connections[hub] = set()
@@ -245,7 +261,7 @@ class Parsers:
             tmp = arg.split("=")
             if len(tmp) != 2:
                 raise ValueError(f"Invalid metadata '{arg}'")
-            name, value= tmp
+            name, value = tmp
             if name not in {"color", "zone", "max_drones"}:
                 raise ValueError("Invalid metadata arguments")
             else:

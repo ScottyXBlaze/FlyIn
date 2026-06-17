@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 19:26:47 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 12:57:27 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -134,7 +134,7 @@ class Connection(BaseModel):
 class DroneNetwork(BaseModel):
     """DroneNetwork Class."""
 
-    nb_drones: int = Field(gt=0)
+    nb_drones: int = Field(gt=0, le=10000)
     start_hub: str = Field(default="")
     end_hub: str = Field(default="")
     hubs: dict[str, Hub] = Field(default_factory=dict)

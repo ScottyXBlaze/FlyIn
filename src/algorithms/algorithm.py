@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 10:54:47 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 17:38:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -34,10 +34,9 @@ class Algorithm:
 
         self.h_value = ReverseDijkstra.calculate_heuristic(drone_network)
         self.drones: list[Drone] = self.set_drones()
+
         self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
         self.edge_usage: dict[tuple[str, str], int] = {}
-
-        # Variable to store the result
         self.result: list[tuple[int, tuple[float, float]]] = []
 
     def set_drones(self) -> list[Drone]:
@@ -141,7 +140,7 @@ class Algorithm:
                 return hub
         return None
 
-    def moove_drone(
+    def move_drone(
         self, drone: Drone, new_hub: Hub, old_hub: Hub
     ) -> tuple[str, tuple[float, float]]:
         """
@@ -232,7 +231,7 @@ class Algorithm:
                 if not drone.target_hub:
                     return
 
-                move, position = self.moove_drone(
+                move, position = self.move_drone(
                     drone, drone.target_hub, current_hub
                 )
                 if move:
@@ -262,12 +261,13 @@ class Algorithm:
                 if not closest_neighbor:
                     continue
 
-                move, position = self.moove_drone(
+                move, position = self.move_drone(
                     drone, closest_neighbor, current_hub
                 )
                 if move:
                     result.append(move)
                     self.result.append((turn, position))
+
                     moved_this_turn.add(drone.id)
                     edge_key = (current_hub.name, closest_neighbor.name)
                     self.edge_usage[edge_key] = (
@@ -281,12 +281,14 @@ class Algorithm:
 
             # If there are no drones left, we stop
             if not self.drones:
+                print(f"\nTotal Turn: {turn}")
                 return
 
             # If nothing moved and nobody is in transit, the network is stuck
             if not result and not any(
                 drone.is_in_connection for drone in self.drones
             ):
+                print(f"\nTotal Turn: {turn}")
                 return
 
             # Record positions of all drones for this turn

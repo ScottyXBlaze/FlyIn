@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:48:12 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/13 15:38:08 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 13:28:11 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -43,16 +43,19 @@ class StateManager:
             path (list[dict[int, tuple[int, int]]]): Path of each drone.
         """
         pygame.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
         self.clock = pygame.time.Clock()
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
         pygame.display.set_icon(
-            pygame.image.load(os.path.join(base_dir, "assets", "MainLogo.png"))
+            pygame.image.load(
+                os.path.join(self.base_dir, "assets", "MainLogo.png")
+            )
         )
 
         pygame.mixer.music.load(
-            os.path.join(base_dir, "assets", "music", "Clouds.ogg")
+            os.path.join(self.base_dir, "assets", "music", "Clouds.ogg")
         )
         pygame.mixer.music.play(-1)
 

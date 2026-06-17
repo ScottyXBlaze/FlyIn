@@ -6,14 +6,17 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:51:36 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/15 10:29:14 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/16 16:42:40 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the home program."""
 
-import pygame
+import time
 import os
+
+import pygame
+
 from .base_state import State
 from .settings import WINDOWHEIGHT, WINDOWWIDTH
 from .sprite_converter import SpriteConverter
@@ -26,6 +29,7 @@ class Button(pygame.sprite.Sprite):
         self,
         pos: tuple[int, int],
         frames: list[pygame.Surface],
+        sound: pygame.Sound,
     ) -> None:
         """
         Everything starts here.
@@ -43,6 +47,8 @@ class Button(pygame.sprite.Sprite):
         self.animation_time = 0.017
         self.current_time = 0.0
         self.is_working = False
+
+        self.sound = sound
 
     def animate(self) -> None:
         """Animate the button when called."""
@@ -79,6 +85,8 @@ class Button(pygame.sprite.Sprite):
         mouse_pos = pygame.mouse.get_pos()
 
         if self.rect.collidepoint(mouse_pos):
+            if not self.is_working:
+                self.sound.play()
             self.is_working = True
         else:
             if self.is_working:
@@ -121,14 +129,21 @@ class Home(State):
             pygame.sprite.Group()
         )
 
+        self.button_sfx = pygame.mixer.Sound(
+            os.path.join(self.base_dir, "assets", "music", "ClickStart.wav")
+        )
+        self.button_sfx.set_volume(0.2)
+
         self.button_start = Button(
             ((WINDOWWIDTH // 2 - 200), WINDOWHEIGHT - 400),
             self.frames["start"],
+            self.button_sfx,
         )
 
         self.button_end = Button(
             ((WINDOWWIDTH // 2 - 200), WINDOWHEIGHT - 250),
             self.frames["exit"],
+            self.button_sfx,
         )
         self.all_sprites.add(self.button_start, self.button_end)
 
@@ -145,7 +160,8 @@ class Home(State):
                 self.background,
                 self.screen.get_size() if self.screen else (0, 0),
             )
-        # self.activation_music = pygame.mixer.music.load(self.base_dir)
+
+        # self.activation_music = pygame.mixer.music.load(self.self.self.base_dir)
 
     def init_sprites(self) -> None:
         """Initialize every sprite for the screen."""
@@ -205,8 +221,11 @@ class Home(State):
             if not signal:
                 self.signal = 0
             else:
-                self.signal = 2
+                self.button_sfx.play()
+                self.signal = signal
         else:
+            self.button_sfx.play()
+            time.sleep(0.3)
             self.signal = signal
         self.check_event()
         self.render()
