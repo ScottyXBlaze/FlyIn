@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/16 17:38:33 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/17 13:54:37 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -97,6 +97,8 @@ class Algorithm:
                 ZoneType.blocked: 3,
             }[hub.metadata.zone]
 
+            special_rank = 0 if hub.name == "priority" else zone_rank
+
             # Keep the shortest path preference, but add a small load-aware
             # penalty so parallel branches get used more evenly.
             score = (
@@ -110,10 +112,10 @@ class Algorithm:
                 (
                     (
                         score,
+                        special_rank,
                         usage,
                         hub.current_drone,
                         connection.current_drone,
-                        zone_rank,
                         hub.name,
                     ),
                     hub,
@@ -123,8 +125,7 @@ class Algorithm:
         if not candidates:
             return None
 
-        candidates.sort(key=lambda item: item[0])
-        return candidates[0][1]
+        return sorted(candidates, key=lambda item: item[0])[0][1]
 
     def get_hub_by_pos(self, pos: tuple[int, int]) -> Hub | None:
         """

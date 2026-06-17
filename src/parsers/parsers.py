@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/16 18:08:27 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/17 08:27:26 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -50,6 +50,7 @@ class Parsers:
 
             # Check that the first argument is always the nb of drone
             for line in file:
+                line = line.strip()
                 if line.startswith("#") or not line:
                     continue
                 else:
@@ -206,6 +207,8 @@ class Parsers:
         if args[0] not in {"hub:", "start_hub:", "end_hub:"}:
             raise ValueError(f"Invalid index {args[0]} in {line}")
 
+        if args[1] in self.hubs.keys():
+            raise ValueError(f"Duplicate hub name {args[1]}")
         name = args[1]
         x = args[2]
         y = args[3]

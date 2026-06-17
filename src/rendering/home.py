@@ -6,14 +6,14 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/11 18:51:36 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/16 16:42:40 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/17 10:27:56 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the home program."""
 
-import time
 import os
+import time
 
 import pygame
 
@@ -36,7 +36,8 @@ class Button(pygame.sprite.Sprite):
 
         Args:
             pos (tuple[int, int]): Position of the button.
-            frames (list[pygame.Surface]): The sprites for the button.
+            frames (list[pygame.Surface]): The sprites
+            for the button.
         """
         super().__init__()
         self.frames = frames
@@ -160,8 +161,6 @@ class Home(State):
                 self.background,
                 self.screen.get_size() if self.screen else (0, 0),
             )
-
-        # self.activation_music = pygame.mixer.music.load(self.self.self.base_dir)
 
     def init_sprites(self) -> None:
         """Initialize every sprite for the screen."""

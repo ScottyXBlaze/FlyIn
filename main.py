@@ -6,20 +6,20 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/16 17:35:59 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/17 08:58:45 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Main file."""
 
 import importlib
-
 import sys
 
 
 def print_error() -> None:
     """Print an error and usage message."""
     print("""
+
 ==== Usage ====
 
 [Using the python file]
@@ -27,6 +27,7 @@ uv run python3 main.py <mapfile>
 
 [Using the Makefile]
 make run MAP=<mapfile>
+
 """)
 
 
@@ -54,7 +55,8 @@ if not check_dependencies():
     print("[Error] Missing dependencies")
     print_error()
     sys.exit(1)
-from src import Parsers, Algorithm, StateManager  # noqa: E402
+
+from src import Algorithm, Parsers, StateManager  # noqa: E402
 
 
 class Main:

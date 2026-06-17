@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:42 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/16 17:56:22 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/17 10:28:57 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -36,7 +36,8 @@ class HubSprite(pygame.sprite.Sprite):
         Every initialization.
 
         Args:
-            pos (tuple[int, int]): Position of the hub. color (str): Color of the hub.
+            pos (tuple[int, int]): Position of the hub.
+            color (str): Color of the hub.
             name (str): Name of the Hub.
         """
         super().__init__()
