@@ -1,12 +1,12 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    model.py                                          :+:      :+:    :+:    #
+#    main_model.py                                     :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/16 12:57:27 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/19 10:38:59 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -223,3 +223,40 @@ class Vector2:
             tuple[int, int]: The position in a tuple format.
         """
         return self.x, self.y
+
+
+class Drone:
+    """Main class for every drone."""
+
+    def __init__(self, id: int, pos: tuple[int, int]) -> None:
+        """
+        Everything starts here.
+
+        Args:
+            id (int): The id of the drone.
+        """
+        self.id = id
+        self._position = Vector2(pos)
+        self.is_in_connection: bool = False
+        self.target_hub: Hub | None = None
+        self.target_connection: Connection | None = None
+
+    def move(self, x: int, y: int) -> None:
+        """
+        Move the drone to a specific location.
+
+        Args:
+            x (int): x position.
+            y (int): y position.
+        """
+        self._position.set_position(x, y)
+
+    @property
+    def get_position(self) -> tuple[int, int]:
+        """
+        Get the position of the drone.
+
+        Returns:
+            tuple: The position of the drone in integer.
+        """
+        return self._position.get_position()

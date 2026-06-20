@@ -1,18 +1,25 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    sprite_converter.py                               :+:      :+:    :+:    #
+#    rendering_utils.py                                :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
-#    Created: 2026/06/07 19:53:49 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/07 19:53:55 by nyramana        ###   ########.fr        #
+#    Created: 2026/06/07 19:53:47 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/19 14:17:59 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Module that contain a basic sprite utilities."""
+"""Module that contain some static variable."""
 
 import pygame
+from abc import ABC, abstractmethod
+
+
+class GlobalParameters:
+    WINDOWWIDTH, WINDOWHEIGHT = 1400, 800
+    CELL_SIZE = 50
+    OFFSET = (20, 20)
 
 
 class SpriteConverter:
@@ -51,3 +58,17 @@ class SpriteConverter:
                 frame_list.append(tile)
 
         return frame_list
+
+
+class State(ABC):
+    """Base state class for every screen or display."""
+
+    @abstractmethod
+    def run(self, dt: float) -> int:
+        """Run the program and return some signal."""
+        pass
+
+    @abstractmethod
+    def reset(self) -> None:
+        """Reset the program if needed."""
+        pass

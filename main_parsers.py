@@ -6,14 +6,14 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/17 08:27:26 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/19 10:35:44 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the parser of the program."""
 
 from typing import Any
-from .. import Connection, DroneNetwork, Hub
+from main_model import Connection, DroneNetwork, Hub
 
 
 class Parsers:
