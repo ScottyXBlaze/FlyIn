@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/17 08:58:45 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/19 14:31:46 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,6 +14,10 @@
 
 import importlib
 import sys
+
+from main_algorithm import Algorithm
+from main_parsers import Parsers
+from main_rendering import StateManager
 
 
 def print_error() -> None:
@@ -44,7 +48,7 @@ def check_dependencies() -> bool:
     }
     for dependency in dependencies:
         try:
-            importlib.import_module(dependency)
+            _ = importlib.import_module(dependency)
         except ImportError:
             print("Hello", dependency)
             return False
@@ -56,16 +60,14 @@ if not check_dependencies():
     print_error()
     sys.exit(1)
 
-from src import Algorithm, Parsers, StateManager  # noqa: E402
-
 
 class Main:
     """Main Class."""
 
     def __init__(self) -> None:
         """Everything starts here."""
-        self.path = ""
-        self.visual = False
+        self.path: str = ""
+        self.visual: bool = False
         self.check_args()
 
     def check_args(self) -> None:
@@ -105,19 +107,19 @@ class Main:
             print(f"[Error] Unexpected {e}")
             sys.exit(1)
 
-        self.algorithm = Algorithm(network)
+        algorithm = Algorithm(network)
 
         # Check that the path is available
-        if not self.algorithm.h_value.get(network.get_start_hub.name):
+        if not algorithm.h_value.get(network.get_start_hub.name):
             print("[ERROR] Start position is not linked with end position.\n")
             sys.exit(1)
 
-        self.algorithm.run()
+        algorithm.run()
 
         if self.visual:
-            path = self.algorithm.get_path()
-            self.renderer = StateManager(network, self.algorithm.h_value, path)
-            self.renderer.run()
+            path = algorithm.get_path()
+            renderer = StateManager(network, algorithm.h_value, path)
+            renderer.run()
 
 
 if __name__ == "__main__":

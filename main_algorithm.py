@@ -1,23 +1,73 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    algorithm.py                                      :+:      :+:    :+:    #
+#    main_algorithm.py                                 :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
-#    By: nyramana <nyramana@student.42.fr>         +#+  +:+       +#+         #
+#    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
-#    Created: 2026/06/07 19:49:13 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/17 13:54:37 by nyramana        ###   ########.fr        #
+#    Created: 2026/06/07 19:54:24 by nyramana         #+#    #+#              #
+#    Updated: 2026/06/19 14:33:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Module that contain the main algorithm class."""
+"""Class that store the reverse dijkstra class."""
 
-from src.model import ZoneType
+import heapq
 
-from .. import DroneNetwork, Hub
-from .reverse_dijkstra import ReverseDijkstra
+from main_model import DroneNetwork, ZoneType, Drone, Hub
 
-from .drone import Drone
+
+class ReverseDijkstra:
+    """Class that store the reverse dijkstra algorithm."""
+
+    @staticmethod
+    def calculate_heuristic(
+        drone_connection: DroneNetwork,
+    ) -> dict[str, int | float]:
+        """
+        Calculate the heuristic value for each hub.
+
+        Args:
+            drone_connection (DroneNetwork): The class
+            for the drone connection.
+        Returns:
+            dict: a dict of {name: value} for each hub.
+        """
+        network_compass: dict[str, int | float] = {}
+        open_list: list[tuple[int | float, str]] = []
+        heapq.heappush(open_list, (0, drone_connection.get_end_hub.name))
+
+        while open_list:
+            current_cost, current_hub = heapq.heappop(open_list)
+
+            real_hub = drone_connection.hubs[current_hub]
+            if current_hub in network_compass:
+                continue
+
+            network_compass[current_hub] = current_cost
+
+            for hub in drone_connection.get_neighbors(current_hub):
+                new_cost = current_cost
+                if hub.name in network_compass:
+                    continue
+
+                if real_hub.metadata.zone == ZoneType.restricted:
+                    new_cost += 2
+                elif (
+                    real_hub.metadata.zone == ZoneType.normal
+                    or real_hub.metadata.zone == ZoneType.priority
+                ):
+                    new_cost += 1
+                else:
+                    new_cost = -1
+
+                if hub.metadata.zone == ZoneType.blocked:
+                    new_cost = -1
+
+                if new_cost >= 0:
+                    heapq.heappush(open_list, (new_cost, hub.name))
+
+        return network_compass
 
 
 class Algorithm:
@@ -30,9 +80,11 @@ class Algorithm:
         Args:
             drone_network (DroneNetwork): The drone network class.
         """
-        self.drone_network = drone_network
+        self.drone_network: DroneNetwork = drone_network
 
-        self.h_value = ReverseDijkstra.calculate_heuristic(drone_network)
+        self.h_value: dict[str, int | float] = (
+            ReverseDijkstra.calculate_heuristic(drone_network)
+        )
         self.drones: list[Drone] = self.set_drones()
 
         self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
@@ -46,7 +98,7 @@ class Algorithm:
         Returns:
             list[Drone]: List of the drone.
         """
-        drones = []
+        drones: list[Drone] = []
         start_pos = self.drone_network.get_start_hub.get_position
         for i in range(1, self.drone_network.nb_drones + 1):
             drones.append(Drone(i, start_pos))
@@ -70,14 +122,14 @@ class Algorithm:
         )
 
         for hub in self.drone_network.get_neighbors(hub_name):
+
             hub_h = self.h_value.get(hub.name, float("inf"))
             if hub_h >= current_h:
                 continue
 
             connection = self.drone_network.get_connection_between(
                 hub_name, hub.name
-            )
-            # If the connection is not available (for restricted)
+            )  # If the connection is not available (for restricted)
             if not connection or not connection.is_available():
                 continue
 
@@ -99,8 +151,6 @@ class Algorithm:
 
             special_rank = 0 if hub.name == "priority" else zone_rank
 
-            # Keep the shortest path preference, but add a small load-aware
-            # penalty so parallel branches get used more evenly.
             score = (
                 float(hub_h)
                 + (usage * 1.5)
@@ -125,7 +175,7 @@ class Algorithm:
         if not candidates:
             return None
 
-        return sorted(candidates, key=lambda item: item[0])[0][1]
+        return sorted(candidates)[0][1]
 
     def get_hub_by_pos(self, pos: tuple[int, int]) -> Hub | None:
         """
@@ -214,8 +264,8 @@ class Algorithm:
         turn = 0
         while True:
             result: list[str] = []
-            drones_to_remove = []
-            drones_snapshot = list(self.drones)
+            drones_to_remove: list[Drone] = []
+            drones_snapshot: list[Drone] = list(self.drones)
             moved_this_turn: set[int] = set()
             for drone in drones_snapshot:
                 if not drone.is_in_connection:
