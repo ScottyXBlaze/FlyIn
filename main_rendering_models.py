@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:40 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/21 18:29:47 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 18:37:11 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -18,7 +18,7 @@ from typing import Any, override
 
 import pygame
 
-from main_parsers import Connection, DroneNetwork, Hub
+from main_model import Connection, DroneNetwork, Hub
 from main_rendering_utils import (
     GlobalParameters,
     SpriteConverter,
@@ -181,7 +181,12 @@ class ConnectionSprite(pygame.sprite.Sprite):
             )
             pygame.draw.line(
                 self.image,
-                (20, 20, 20, 150),
+                (
+                    (50 * self._connection.max_link_capacity) % 256,
+                    (30 * self._connection.max_link_capacity) % 256,
+                    (20 * self._connection.max_link_capacity) % 256,
+                    255,
+                ),
                 self._transform_pos(end_pos),
                 self._transform_pos(start_pos),
                 self._connection.max_link_capacity * 4,
