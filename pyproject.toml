@@ -11,3 +11,4 @@ dependencies = [
     "pydantic>=2.13.4",
     "pygame-ce>=2.5.7",
 ]
+package-version = false

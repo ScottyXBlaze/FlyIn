@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/03/13 20:22:53 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 21:54:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -18,6 +18,7 @@ from parsing and algorithm to rendering.
 """
 
 import importlib
+import os
 import sys
 
 
@@ -36,6 +37,9 @@ make run MAP=<mapfile>
 
 """
     )
+
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 
 def check_dependencies() -> bool:
@@ -78,22 +82,22 @@ class Main:
 
     def __init__(self) -> None:
         """Everything starts here."""
-        self.path: str = ""
-        self.visual: bool = False
+        self._path: str = ""
+        self._visual: bool = False
         self.check_args()
 
     def check_args(self) -> None:
         """Check if the argument of the program is valid."""
         for arg in sys.argv[1:]:
             if arg == "--visual":
-                self.visual = True
-            elif self.path == "":
-                self.path = arg
+                self._visual = True
+            elif self._path == "":
+                self._path = arg
             else:
                 print("[Error] Too much arguments")
                 print_error()
                 sys.exit(1)
-        if self.path == "":
+        if self._path == "":
             print("[Error] No enough arguments")
             print_error()
             sys.exit(1)
@@ -104,13 +108,11 @@ class Main:
         from pydantic import ValidationError
 
         try:
-            parsers = Parsers(self.path)
+            parsers = Parsers(self._path)
             network = parsers.read_line()
         except ValidationError as e:
             for error in e.errors():
-                print(
-                    f"[ERROR] {error['msg']} {error['loc']}{error['input']}\n"
-                )
+                print(f"[ERROR] {error['msg']}\n")
             sys.exit(1)
         except ValueError as e:
             print(f"[ERROR] {e}\n")
@@ -128,17 +130,13 @@ class Main:
 
         algorithm.run()
 
-        if self.visual:
+        if self._visual:
             path = algorithm.get_path()
             renderer = StateManager(network, algorithm.h_value, path)
             renderer.run()
 
 
 if __name__ == "__main__":
-
-    if not check_dependencies():
-        print("[Error] Missing dependencies")
-
     main = Main()
     try:
         main.run()

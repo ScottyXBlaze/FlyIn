@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:40 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/21 20:47:01 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 18:29:47 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -44,17 +44,16 @@ class HubSprite(pygame.sprite.Sprite):
             name (str): Name of the Hub.
         """
         super().__init__()
-        self.name = name
-        self.pos: tuple[int, int] = self.transform_pos(pos)
+        self._name = name
+        self._pos: tuple[int, int] = self._transform_pos(pos)
         self.image = sprite.copy()
         self.image = pygame.transform.scale(
             self.image,
             (GlobalParameters.CELL_SIZE, GlobalParameters.CELL_SIZE),
         )
-        self.copy_image = self.image.copy()
-        self.rect = self.image.get_frect(topleft=self.pos)
-        self.color_name = color
-        self.hue = 0
+        self.rect = self.image.get_frect(topleft=self._pos)
+        self._color_name = color
+        self._hue = 0
         if color != "rainbow":
             self.image = self._tint_sprite(
                 self.image,
@@ -73,7 +72,7 @@ class HubSprite(pygame.sprite.Sprite):
         return image
 
     @staticmethod
-    def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
+    def _transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
         """
         Transform the index position into a real position in the screen.
 
@@ -93,8 +92,8 @@ class HubSprite(pygame.sprite.Sprite):
         Args:
             mouse_world (tuple[int, int]): The position of the mouse.
         """
-        world_x = self.pos[0]
-        world_y = self.pos[1]
+        world_x = self._pos[0]
+        world_y = self._pos[1]
 
         world_rect = pygame.Rect(
             0, 0, GlobalParameters.CELL_SIZE, GlobalParameters.CELL_SIZE
@@ -105,17 +104,17 @@ class HubSprite(pygame.sprite.Sprite):
 
     def update(self) -> None:
         """Update the color of the hub."""
-        if self.color_name == "rainbow":
+        if self._color_name == "rainbow":
             self.color = pygame.Color(0, 0, 0)
-            self.color.hsva = (self.hue, 100, 100, 100)
+            self.color.hsva = (self._hue, 100, 100, 100)
             if self.image:
                 self.image = self._tint_sprite(
-                    self.copy_image,
+                    self.image,
                     (self.color.r, self.color.g, self.color.b, self.color.a),
                 )
-            self.hue += 4
-            if self.hue >= 360:
-                self.hue = 0
+            self._hue += 4
+            if self._hue >= 360:
+                self._hue = 0
 
 
 class ConnectionSprite(pygame.sprite.Sprite):
@@ -132,25 +131,25 @@ class ConnectionSprite(pygame.sprite.Sprite):
         """
         super().__init__()
 
-        self.hub1, self.hub2 = hub1, hub2
-        self.connection = connection
+        self._hub1, self._hub2 = hub1, hub2
+        self._connection = connection
 
-        self.width = abs(hub1.x - hub2.x)
-        self.height = abs(hub1.y - hub2.y)
+        self._width = abs(hub1.x - hub2.x)
+        self._height = abs(hub1.y - hub2.y)
 
-        self.original_pos = self.transform_pos((self.width, self.height))
+        self._original_pos = self._transform_pos((self._width, self._height))
         self.image = pygame.Surface(
             (
-                self.original_pos[0] + 10,
-                self.original_pos[1] + 10,
+                self._original_pos[0] + 10,
+                self._original_pos[1] + 10,
             )
         ).convert_alpha()
         self.image.fill((0, 0, 0, 0))
 
-        position = self.transform_pos(
+        position = self._transform_pos(
             (
-                min(self.hub1.x, self.hub2.x),
-                min(self.hub1.y, self.hub2.y),
+                min(self._hub1.x, self._hub2.x),
+                min(self._hub1.y, self._hub2.y),
             )
         )
         self.rect = self.image.get_frect(
@@ -160,32 +159,32 @@ class ConnectionSprite(pygame.sprite.Sprite):
             ),
         )
 
-        self.draw_line()
+        self._draw_line()
 
     @staticmethod
-    def transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
+    def _transform_pos(pos: tuple[int, int]) -> tuple[int, int]:
         """Transform the original position to match the screen."""
         return pos[0] * (
             GlobalParameters.OFFSET[0] + GlobalParameters.CELL_SIZE
         ), pos[1] * (GlobalParameters.OFFSET[1] + GlobalParameters.CELL_SIZE)
 
-    def draw_line(self) -> None:
+    def _draw_line(self) -> None:
         """Draw the Line that connect the two hub."""
         if self.image is not None:
             start_pos = (
-                0 if self.hub1.x <= self.hub2.x else self.width,
-                0 if self.hub1.y <= self.hub2.y else self.height,
+                0 if self._hub1.x <= self._hub2.x else self._width,
+                0 if self._hub1.y <= self._hub2.y else self._height,
             )
             end_pos = (
-                0 if self.hub1.x >= self.hub2.x else self.width,
-                0 if self.hub1.y >= self.hub2.y else self.height,
+                0 if self._hub1.x >= self._hub2.x else self._width,
+                0 if self._hub1.y >= self._hub2.y else self._height,
             )
             pygame.draw.line(
                 self.image,
                 (20, 20, 20, 150),
-                self.transform_pos(end_pos),
-                self.transform_pos(start_pos),
-                self.connection.max_link_capacity * 4,
+                self._transform_pos(end_pos),
+                self._transform_pos(start_pos),
+                self._connection.max_link_capacity * 4,
             )
 
 
@@ -214,28 +213,30 @@ class InfoSprite(pygame.sprite.Sprite):
             drone_network: The DroneNetwork class.
         """
         super().__init__()
-        self.frames = SpriteConverter().convert_sprite(
+        self._frames = SpriteConverter().convert_sprite(
             pygame.image.load(sprite_name),
             (3, 3),
         )
-        self.frame_size = self.frames[0].size
-        self.screen = pygame.display.get_surface()
-        if self.screen is None:
+        self._frame_size = self._frames[0].size
+        self._screen = pygame.display.get_surface()
+        if self._screen is None:
             return
         self.image = pygame.Surface(
-            (self.screen.size[0] - 192, 128)
+            (self._screen.size[0] - 192, 128)
         ).convert_alpha()
         self.image.fill((0, 0, 0, 10))
 
-        self.fonts = "font_JetBrainsMono.ttf"
-        self.font = pygame.font.Font(self.fonts, 15)
+        self._font_name = "font_JetBrainsMono.ttf"
+        self._font = pygame.font.Font(self._font_name, 15)
 
-        self.drone_network = drone_network
-        self.heuristic_value = heuristic_value
-        self.rect = self.image.get_frect(center=(self.screen.size[0] // 2, 68))
-        self.build_info((self.screen.size[0] - 192, 128))
+        self._drone_network = drone_network
+        self._heuristic_value = heuristic_value
+        self.rect = self.image.get_frect(
+            center=(self._screen.size[0] // 2, 68)
+        )
+        self._build_info((self._screen.size[0] - 192, 128))
 
-    def build_info(self, size: tuple[int, int]) -> None:
+    def _build_info(self, size: tuple[int, int]) -> None:
         """Build the info bubble sprite.
 
         Args:
@@ -243,35 +244,35 @@ class InfoSprite(pygame.sprite.Sprite):
         """
         if self.image is None:
             return
-        for row in range(0, size[0], self.frame_size[0]):
-            for col in range(0, size[1], self.frame_size[1]):
+        for row in range(0, size[0], self._frame_size[0]):
+            for col in range(0, size[1], self._frame_size[1]):
                 if col == 0 and row == 0:
-                    self.image.blit(self.frames[0], (row, col))
-                elif row == 0 and col >= size[1] - self.frame_size[1]:
-                    self.image.blit(self.frames[2], (row, col))
+                    self.image.blit(self._frames[0], (row, col))
+                elif row == 0 and col >= size[1] - self._frame_size[1]:
+                    self.image.blit(self._frames[2], (row, col))
                 elif (
-                    col >= size[1] - self.frame_size[1]
-                    and row >= size[0] - self.frame_size[0]
+                    col >= size[1] - self._frame_size[1]
+                    and row >= size[0] - self._frame_size[0]
                 ):
                     pass
-                elif col == 0 and row >= size[0] - self.frame_size[0]:
+                elif col == 0 and row >= size[0] - self._frame_size[0]:
                     pass
                 elif col == 0:
-                    self.image.blit(self.frames[3], (row, col))
-                elif col >= size[1] - self.frame_size[1]:
-                    self.image.blit(self.frames[5], (row, col))
+                    self.image.blit(self._frames[3], (row, col))
+                elif col >= size[1] - self._frame_size[1]:
+                    self.image.blit(self._frames[5], (row, col))
                 elif row == 0:
-                    self.image.blit(self.frames[1], (row, col))
-                elif row >= size[0] - self.frame_size[0]:
-                    self.image.blit(self.frames[7], (row, col))
+                    self.image.blit(self._frames[1], (row, col))
+                elif row >= size[0] - self._frame_size[0]:
+                    self.image.blit(self._frames[7], (row, col))
                 else:
-                    self.image.blit(self.frames[4], (row, col))
+                    self.image.blit(self._frames[4], (row, col))
         # Always print the right one
         self.image.blit(
-            self.frames[6], self.frames[6].get_frect(topright=(size[0], 0))
+            self._frames[6], self._frames[6].get_frect(topright=(size[0], 0))
         )
         self.image.blit(
-            self.frames[8], self.frames[8].get_frect(bottomright=(size))
+            self._frames[8], self._frames[8].get_frect(bottomright=(size))
         )
 
     def draw_hub_tooltip(self, hub: Hub | None) -> None:
@@ -280,14 +281,14 @@ class InfoSprite(pygame.sprite.Sprite):
         Args:
             hub: The hub to show.
         """
-        if self.screen is None:
+        if self._screen is None:
             return
-        self.build_info((self.screen.size[0] - 192, 128))
+        self._build_info((self._screen.size[0] - 192, 128))
         real_hub = hub
         if not real_hub:
             return
         connections = ", ".join(
-            self.drone_network.connections.get(real_hub.name, {})
+            self._drone_network.connections.get(real_hub.name, {})
         )
         if len(connections) > 88:
             connections = "Too much to show..."
@@ -298,12 +299,12 @@ class InfoSprite(pygame.sprite.Sprite):
             f"Color: {real_hub.metadata.color.capitalize()}",
             f"Max Drone for hub: {real_hub.metadata.max_drones}",
             f"Current Drone: {real_hub.current_drone}",
-            f"Total drone: {self.drone_network.nb_drones}",
+            f"Total drone: {self._drone_network.nb_drones}",
             f"Connected to: {connections}",
         ]
 
         text_surfaces = [
-            self.font.render(line, True, (255, 255, 255)) for line in lines
+            self._font.render(line, True, (255, 255, 255)) for line in lines
         ]
         if self.image is None:
             return
@@ -344,9 +345,9 @@ class DroneSprite(pygame.sprite.Sprite):
         """
         super().__init__()
         # Base attribute for each drone.
-        self.drone_id = id
-        self.grid_pos = position
-        self.pixel_offset = offset
+        self._drone_id = id
+        self._grid_pos = position
+        self._pixel_offset = offset
 
         # frame of the drone
         self._frames = SpriteConverter().convert_sprite(sprite, (2, 1))
@@ -355,7 +356,7 @@ class DroneSprite(pygame.sprite.Sprite):
                 self._tint_sprite(frame, color) for frame in self._frames
             ]
 
-        self.px, self.py = self.grid_to_px(*position, self.pixel_offset)
+        self._px, self._py = self._grid_to_px(*position, self._pixel_offset)
 
         # Animation variable
         self._anim_speed: float = 0.3
@@ -368,14 +369,14 @@ class DroneSprite(pygame.sprite.Sprite):
         self._frame_speed: float = random.uniform(0.05, 0.2)
 
         # Position end to start
-        self._anim_start: tuple[float, float] = (self.px, self.py)
-        self._anim_end: tuple[float, float] = (self.px, self.py)
+        self._anim_start: tuple[float, float] = (self._px, self._py)
+        self._anim_end: tuple[float, float] = (self._px, self._py)
 
         # Image and rect of the sprite
         self.image = self._frames[self._frame_index]
-        self.rect = self.image.get_frect(center=(self.px, self.py))
+        self.rect = self.image.get_frect(center=(self._px, self._py))
 
-    def grid_to_px(
+    def _grid_to_px(
         self, gx: int, gy: int, offset: tuple[int, int] = (0, 0)
     ) -> tuple[float, float]:
         """
@@ -420,7 +421,7 @@ class DroneSprite(pygame.sprite.Sprite):
     @property
     def position(self) -> tuple[int, int]:
         """Get the position of the drone."""
-        return self.grid_pos
+        return self._grid_pos
 
     @position.setter
     def position(self, new_pos: tuple[int, int]) -> None:
@@ -430,11 +431,11 @@ class DroneSprite(pygame.sprite.Sprite):
         Args:
             new_pos (tuple[int, int]): The new position of the drone.
         """
-        self.grid_pos = new_pos
-        self.px, self.py = self.grid_to_px(*new_pos, self.pixel_offset)
+        self._grid_pos = new_pos
+        self._px, self._py = self._grid_to_px(*new_pos, self._pixel_offset)
         self._anim_active = False
 
-    def move_to(self, dest: tuple[int, int]) -> None:
+    def _move_to(self, dest: tuple[int, int]) -> None:
         """
         Move the drone to a specific destination.
 
@@ -442,14 +443,14 @@ class DroneSprite(pygame.sprite.Sprite):
             dest (tuple[int, int]): The destination of the drone.
         """
         # If it is already in it's position, don't do anything
-        if dest == self.grid_pos and not self._anim_active:
+        if dest == self._grid_pos and not self._anim_active:
             return
 
-        self._anim_start = (self.px, self.py)
-        self._anim_end = self.grid_to_px(*dest, self.pixel_offset)
+        self._anim_start = (self._px, self._py)
+        self._anim_end = self._grid_to_px(*dest, self._pixel_offset)
         self._anim_elapsed = 0.0
         self._anim_active = True
-        self.grid_pos = dest
+        self._grid_pos = dest
 
     def update(self, dt: float) -> None:
         """
@@ -468,7 +469,7 @@ class DroneSprite(pygame.sprite.Sprite):
             return
 
         if not self._anim_active:
-            self.rect.center = (self.px, self.py)
+            self.rect.center = (self._px, self._py)
             return
 
         self._anim_elapsed += dt
@@ -476,12 +477,12 @@ class DroneSprite(pygame.sprite.Sprite):
 
         sx, sy = self._anim_start
         ex, ey = self._anim_end
-        self.px = sx + (ex - sx) * t
-        self.py = sy + (ey - sy) * t
-        self.rect.center = (self.px, self.py)
+        self._px = sx + (ex - sx) * t
+        self._py = sy + (ey - sy) * t
+        self.rect.center = (self._px, self._py)
 
         if self._anim_elapsed >= self._anim_speed:
-            self.px, self.py = self._anim_end
+            self._px, self._py = self._anim_end
             self._anim_active = False
             self.rect.center = self._anim_end
 
@@ -514,13 +515,13 @@ class AllSprite(pygame.sprite.Group[pygame.sprite.Sprite]):
         hub_layout = [
             sprite
             for sprite in self
-            if not hasattr(sprite, "connection")
+            if not hasattr(sprite, "_connection")
             and not hasattr(sprite, "drone_id")
         ]
         connection_layout = [
             sprite
             for sprite in self
-            if hasattr(sprite, "connection")
+            if hasattr(sprite, "_connection")
             and not hasattr(sprite, "drone_id")
         ]
 
@@ -563,20 +564,20 @@ class Camera:
     def __init__(self) -> None:
         """Everything starts here."""
         # Position
-        self.camera_x = 0
-        self.camera_y = 0
+        self._camera_x = 0
+        self._camera_y = 0
 
         # Usefull variable
-        self.draging = False
-        self.last_mouse_pos = (0, 0)
-        self.bound = [0, 0, 0, 0]
+        self._draging = False
+        self._last_mouse_pos = (0, 0)
+        self._bound = [0, 0, 0, 0]
 
     def handle_camera(self) -> None:
         """Handle camera to not go too far."""
-        self.camera_y = min(self.bound[1], self.camera_y)
-        self.camera_y = max(self.bound[3], self.camera_y)
-        self.camera_x = min(self.bound[0], self.camera_x)
-        self.camera_x = max(self.bound[2], self.camera_x)
+        self._camera_y = min(self._bound[1], self._camera_y)
+        self._camera_y = max(self._bound[3], self._camera_y)
+        self._camera_x = min(self._bound[0], self._camera_x)
+        self._camera_x = max(self._bound[2], self._camera_x)
 
     def check_bound(self, hubs: dict[str, Hub]) -> list[int]:
         """
@@ -623,23 +624,23 @@ class Button(pygame.sprite.Sprite):
             for the button.
         """
         super().__init__()
-        self.frames = frames
-        self.image = self.frames[0]
+        self._frames = frames
+        self.image = self._frames[0]
         self.rect = self.image.get_frect(topleft=pos)
 
-        self.frame_index = 0
-        self.animation_time = 0.017
-        self.current_time = 0.0
-        self.is_working = False
+        self._frame_index = 0
+        self._animation_time = 0.017
+        self._current_time = 0.0
+        self._is_working = False
 
-        self.sound = sound
+        self._sound = sound
 
-    def animate(self) -> None:
+    def _animate(self) -> None:
         """Animate the button when called."""
-        self.frame_index += 1
-        self.image = self.frames[self.frame_index % len(self.frames)]
+        self._frame_index += 1
+        self.image = self._frames[self._frame_index % len(self._frames)]
 
-    def time_animation(self, dt: float) -> bool:
+    def _time_animation(self, dt: float) -> bool:
         """
         Handle the time of the animation.
 
@@ -648,18 +649,18 @@ class Button(pygame.sprite.Sprite):
         Returns:
             bool: True if it can animate.
         """
-        self.current_time += dt
-        if self.current_time >= self.animation_time:
-            self.current_time = 0
+        self._current_time += dt
+        if self._current_time >= self._animation_time:
+            self._current_time = 0
             return True
         return False
 
     def reset(self) -> None:
         """Reset the button state like frame and time."""
-        self.current_time = 0.0
-        self.frame_index = 0
-        self.is_working = False
-        self.image = self.frames[0]
+        self._current_time = 0.0
+        self._frame_index = 0
+        self._is_working = False
+        self.image = self._frames[0]
 
     def check_hovered(self) -> None:
         """Check if the button is hovered by the mouse."""
@@ -669,11 +670,11 @@ class Button(pygame.sprite.Sprite):
         mouse_pos = pygame.mouse.get_pos()
 
         if self.rect.collidepoint(mouse_pos):
-            if not self.is_working:
-                self.sound.play()
-            self.is_working = True
+            if not self._is_working:
+                self._sound.play()
+            self._is_working = True
         else:
-            if self.is_working:
+            if self._is_working:
                 self.reset()
 
     def update_sprite(self, dt: float, signal: int) -> int | None:
@@ -689,8 +690,8 @@ class Button(pygame.sprite.Sprite):
         if pygame.mouse.get_pressed()[0]:
             self.check_hovered()
 
-        if self.is_working and self.time_animation(dt):
-            if self.frame_index == 3:
+        if self._is_working and self._time_animation(dt):
+            if self._frame_index == 3:
                 return signal
-            self.animate()
+            self._animate()
         return 0

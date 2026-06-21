@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/03/13 20:38:36 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 21:12:28 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -22,8 +22,8 @@ contains everything from the nb of drone to every Hub and Connection.
 from enum import Enum
 from typing import Self
 
-from pygame.color import THECOLORS
 from pydantic import BaseModel, Field, model_validator
+from pygame.color import THECOLORS
 
 
 class ZoneType(str, Enum):

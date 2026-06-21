@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/03/13 20:42:32 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 18:11:57 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -37,13 +37,13 @@ class Parsers:
         Args:
             path (str): The path of the file.
         """
-        self.path = path
-        self.raw_data: dict[str, Any] = {}
-        self.hubs: dict[str, Hub] = {}
-        self.connections: dict[str, set[str]] = {}
-        self.raw_connections: dict[str, Connection] = {}
+        self._path = path
+        self._raw_data: dict[str, Any] = {}
+        self._hubs: dict[str, Hub] = {}
+        self._connections: dict[str, set[str]] = {}
+        self._raw_connections: dict[str, Connection] = {}
 
-        self.checker: dict[str, bool] = {
+        self._checker: dict[str, bool] = {
             "nb_drones": False,
             "start_hub": False,
             "end_hub": False,
@@ -57,7 +57,7 @@ class Parsers:
             DroneNetwork: The class that contain every information
             of the drone network.
         """
-        with open(self.path) as file:
+        with open(self._path) as file:
 
             # Check that the first argument is always the nb of drone
             for line in file:
@@ -65,30 +65,30 @@ class Parsers:
                 if line.startswith("#") or not line:
                     continue
                 else:
-                    self.parse_nb_drones(line)
-                    self.checker["nb_drones"] = True
+                    self._parse_nb_drones(line)
+                    self._checker["nb_drones"] = True
                     break
             else:
                 raise ValueError("No readable line")
 
             for line in file:
-                self.parse_line(line.strip())
+                self._parse_line(line.strip())
 
-        self.raw_data.update(
+        self._raw_data.update(
             {
-                "hubs": self.hubs,
-                "connections": self.connections,
-                "raw_connection": self.raw_connections,
+                "hubs": self._hubs,
+                "connections": self._connections,
+                "raw_connection": self._raw_connections,
             }
         )
 
-        variables = list(filter(lambda x: not self.checker[x], self.checker))
+        variables = list(filter(lambda x: not self._checker[x], self._checker))
         if variables:
             raise ValueError(f"Missing variables: {", ".join(variables)}")
 
-        return DroneNetwork.model_validate(self.raw_data)
+        return DroneNetwork.model_validate(self._raw_data)
 
-    def parse_line(self, line: str) -> None:
+    def _parse_line(self, line: str) -> None:
         """
         Parse each line.
 
@@ -96,37 +96,37 @@ class Parsers:
             line (str): The line to parse.
         """
         line = line.strip()
-
         if not line or line.startswith("#"):
-            pass
+            return
+
         elif line.startswith("hub: "):
-            self.parse_hub(line)
+            self._parse_hub(line)
 
         elif line.startswith("start_hub: "):
             args = line.split()
-            self.raw_data["start_hub"] = args[1]
-            if not self.checker["start_hub"]:
-                self.checker["start_hub"] = True
+            self._raw_data["start_hub"] = args[1]
+            if not self._checker["start_hub"]:
+                self._checker["start_hub"] = True
             else:
                 raise ValueError("Duplicate start_hub")
-            self.parse_hub(line)
+            self._parse_hub(line)
 
         elif line.startswith("end_hub: "):
             args = line.split()
-            self.raw_data["end_hub"] = args[1]
-            if not self.checker["end_hub"]:
-                self.checker["end_hub"] = True
+            self._raw_data["end_hub"] = args[1]
+            if not self._checker["end_hub"]:
+                self._checker["end_hub"] = True
             else:
                 raise ValueError("Duplicate end_hub")
-            self.parse_hub(line)
+            self._parse_hub(line)
 
         elif line.startswith("connection: "):
-            self.parse_connection(line)
+            self._parse_connection(line)
 
         else:
             raise ValueError(f"Invalid line '{line}'")
 
-    def parse_nb_drones(self, line: str) -> None:
+    def _parse_nb_drones(self, line: str) -> None:
         """
         Get the nb of drone.
 
@@ -140,9 +140,9 @@ class Parsers:
             )
         else:
             key, value = line.split(maxsplit=1)
-            self.raw_data[key[:-1]] = value
+            self._raw_data[key[:-1]] = value
 
-    def parse_connection(self, line: str) -> None:
+    def _parse_connection(self, line: str) -> None:
         """
         Parse the connection.
 
@@ -160,12 +160,12 @@ class Parsers:
             raise ValueError("Invalid connection value")
 
         hub1, hub2 = sorted([i.strip() for i in connection])
-        if hub1 not in self.hubs.keys() or hub2 not in self.hubs.keys():
+        if hub1 not in self._hubs.keys() or hub2 not in self._hubs.keys():
             raise ValueError(f"Hub {hub1} or {hub2} not defined yet")
 
         for hub in [hub1, hub2]:
-            if hub not in self.connections:
-                self.connections[hub] = set()
+            if hub not in self._connections:
+                self._connections[hub] = set()
 
         max_link_capacity = 1
         if len(args) == 3:
@@ -177,8 +177,8 @@ class Parsers:
                 else:
                     raise ValueError("Invalid metadata")
 
-        self.add_connections(hub1, hub2)
-        self.raw_connections.update(
+        self._add_connections(hub1, hub2)
+        self._raw_connections.update(
             {
                 hub1
                 + "-"
@@ -188,7 +188,7 @@ class Parsers:
             }
         )
 
-    def add_connections(self, hub1: str, hub2: str) -> None:
+    def _add_connections(self, hub1: str, hub2: str) -> None:
         """
         Add two hubs in the connection.
 
@@ -196,14 +196,14 @@ class Parsers:
             hub1 (str): Description of hub1.
             hub2 (str): Description of hub2.
         """
-        if hub2 in self.connections[hub1] and hub1 in self.connections[hub2]:
+        if hub2 in self._connections[hub1] and hub1 in self._connections[hub2]:
             raise ValueError(
                 f"Duplicated connection for '{hub1}' and '{hub2}'"
             )
-        self.connections[hub1].add(hub2)
-        self.connections[hub2].add(hub1)
+        self._connections[hub1].add(hub2)
+        self._connections[hub2].add(hub1)
 
-    def parse_hub(self, line: str) -> None:
+    def _parse_hub(self, line: str) -> None:
         """
         Parse the hub.
 
@@ -218,7 +218,7 @@ class Parsers:
         if args[0] not in {"hub:", "start_hub:", "end_hub:"}:
             raise ValueError(f"Invalid index {args[0]} in {line}")
 
-        if args[1] in self.hubs.keys():
+        if args[1] in self._hubs.keys():
             raise ValueError(f"Duplicate hub name {args[1]}")
         name = args[1]
         x = args[2]
@@ -230,13 +230,13 @@ class Parsers:
             "y": y,
         }
         if len(args) == 5:
-            raw_metadata = self.parse_metadata_hub(args[4])
+            raw_metadata = self._parse_metadata_hub(args[4])
             hub_data["metadata"] = raw_metadata
 
-        self.hubs.update({name: Hub.model_validate(hub_data)})
+        self._hubs.update({name: Hub.model_validate(hub_data)})
 
     @staticmethod
-    def parse_metadata_connection(metadata: str) -> dict[str, str]:
+    def _parse_metadata_connection(metadata: str) -> dict[str, str]:
         """
         Parse the metadata for the connection.
 
@@ -255,7 +255,7 @@ class Parsers:
         return config
 
     @staticmethod
-    def parse_metadata_hub(metadata: str) -> dict[str, str]:
+    def _parse_metadata_hub(metadata: str) -> dict[str, str]:
         """
         Parse the metadata for the hub.
 

@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:24 by nyramana         #+#    #+#              #
-#    Updated: 2026/03/13 20:33:58 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 18:07:58 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -22,68 +22,6 @@ import heapq
 from main_model import DroneNetwork, ZoneType, Drone, Hub
 
 
-class ReverseDijkstra:
-    """
-    This class contains the ReverseDijkstra algorithm.
-
-    ReverseDijkstra algorithm is an alternative of the original
-    Dijkstra but used specially to check the closest path from every
-    single zone to it's destination. It is made so that we don't need
-    to recalculate every single zone for each drone but we just check
-    it's value and compare with another zone to see which zone is the
-    best.
-    """
-
-    @staticmethod
-    def calculate_heuristic(
-        drone_connection: DroneNetwork,
-    ) -> dict[str, int | float]:
-        """
-        Calculate the heuristic value for each hub.
-
-        Args:
-            drone_connection (DroneNetwork): The class
-            for the drone connection.
-        Returns:
-            dict: a dict of {name: value} for each hub.
-        """
-        network_compass: dict[str, int | float] = {}
-        open_list: list[tuple[int | float, str]] = []
-        heapq.heappush(open_list, (0, drone_connection.get_end_hub.name))
-
-        while open_list:
-            current_cost, current_hub = heapq.heappop(open_list)
-
-            real_hub = drone_connection.hubs[current_hub]
-            if current_hub in network_compass:
-                continue
-
-            network_compass[current_hub] = current_cost
-
-            for hub in drone_connection.get_neighbors(current_hub):
-                new_cost = current_cost
-                if hub.name in network_compass:
-                    continue
-
-                if real_hub.metadata.zone == ZoneType.restricted:
-                    new_cost += 2
-                elif (
-                    real_hub.metadata.zone == ZoneType.normal
-                    or real_hub.metadata.zone == ZoneType.priority
-                ):
-                    new_cost += 1
-                else:
-                    new_cost = -1
-
-                if hub.metadata.zone == ZoneType.blocked:
-                    new_cost = -1
-
-                if new_cost >= 0:
-                    heapq.heappush(open_list, (new_cost, hub.name))
-
-        return network_compass
-
-
 class Algorithm:
     """
     Main class for the algorithm.
@@ -96,6 +34,67 @@ class Algorithm:
     traverse other zone that has the same value but not visited often.
     """
 
+    class ReverseDijkstra:
+        """
+        This class contains the ReverseDijkstra algorithm.
+
+        ReverseDijkstra algorithm is an alternative of the original
+        Dijkstra but used specially to check the closest path from every
+        single zone to it's destination. It is made so that we don't need
+        to recalculate every single zone for each drone but we just check
+        it's value and compare with another zone to see which zone is the
+        best.
+        """
+
+        @staticmethod
+        def calculate_heuristic(
+            drone_connection: DroneNetwork,
+        ) -> dict[str, int | float]:
+            """
+            Calculate the heuristic value for each hub.
+
+            Args:
+                drone_connection (DroneNetwork): The class
+                for the drone connection.
+            Returns:
+                dict: a dict of {name: value} for each hub.
+            """
+            network_compass: dict[str, int | float] = {}
+            open_list: list[tuple[int | float, str]] = []
+            heapq.heappush(open_list, (0, drone_connection.get_end_hub.name))
+
+            while open_list:
+                current_cost, current_hub = heapq.heappop(open_list)
+
+                real_hub = drone_connection.hubs[current_hub]
+                if current_hub in network_compass:
+                    continue
+
+                network_compass[current_hub] = current_cost
+
+                for hub in drone_connection.get_neighbors(current_hub):
+                    new_cost = current_cost
+                    if hub.name in network_compass:
+                        continue
+
+                    if real_hub.metadata.zone == ZoneType.restricted:
+                        new_cost += 2
+                    elif (
+                        real_hub.metadata.zone == ZoneType.normal
+                        or real_hub.metadata.zone == ZoneType.priority
+                    ):
+                        new_cost += 1
+                    else:
+                        new_cost = -1
+
+                    if hub.metadata.zone == ZoneType.blocked:
+                        new_cost = -1
+
+                    if new_cost >= 0:
+                        heapq.heappush(open_list, (new_cost, hub.name))
+
+            return network_compass
+
     def __init__(self, drone_network: DroneNetwork) -> None:
         """
         Everything starts here.
@@ -103,18 +102,20 @@ class Algorithm:
         Args:
             drone_network (DroneNetwork): The drone network class.
         """
-        self.drone_network: DroneNetwork = drone_network
+        self._drone_network: DroneNetwork = drone_network
 
         self.h_value: dict[str, int | float] = (
-            ReverseDijkstra.calculate_heuristic(drone_network)
+            self.ReverseDijkstra.calculate_heuristic(drone_network)
         )
-        self.drones: list[Drone] = self.set_drones()
+        self._drones: list[Drone] = self._set_drones()
+        self._hub_by_position: dict[tuple[int, int], Hub] = {
+            hub.get_position: hub for hub in self._drone_network.hubs.values()
+        }
 
-        self.drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
-        self.edge_usage: dict[tuple[str, str], int] = {}
-        self.result: list[tuple[int, tuple[float, float]]] = []
+        self._drone_positions_per_turn: list[dict[int, tuple[int, int]]] = []
+        self._edge_usage: dict[tuple[str, str], int] = {}
 
-    def set_drones(self) -> list[Drone]:
+    def _set_drones(self) -> list[Drone]:
         """
         Create every drone we need.
 
@@ -122,12 +123,12 @@ class Algorithm:
             list[Drone]: List of the drone.
         """
         drones: list[Drone] = []
-        start_pos = self.drone_network.get_start_hub.get_position
-        for i in range(1, self.drone_network.nb_drones + 1):
+        start_pos = self._drone_network.get_start_hub.get_position
+        for i in range(1, self._drone_network.nb_drones + 1):
             drones.append(Drone(i, start_pos))
         return drones
 
-    def get_closest_neighbor(self, hub_name: str) -> Hub | None:
+    def _get_closest_neighbor(self, hub_name: str) -> Hub | None:
         """
         Get the closest neighbor of a hub.
 
@@ -140,30 +141,29 @@ class Algorithm:
         # current minimum Heuristic value
         current_h = self.h_value.get(hub_name, float("inf"))
 
-        candidates: list[tuple[tuple[float, int, int, int, int, str], Hub]] = (
-            []
-        )
+        best_key: tuple[float, int, int, int, int, str] | None = None
+        best_hub: Hub | None = None
 
-        for hub in self.drone_network.get_neighbors(hub_name):
+        for hub in self._drone_network.get_neighbors(hub_name):
 
             hub_h = self.h_value.get(hub.name, float("inf"))
             if hub_h >= current_h:
                 continue
 
-            connection = self.drone_network.get_connection_between(
+            connection = self._drone_network.get_connection_between(
                 hub_name, hub.name
             )  # If the connection is not available (for restricted)
             if not connection or not connection.is_available():
                 continue
 
             if (
-                hub.name != self.drone_network.end_hub
+                hub.name != self._drone_network.end_hub
                 and not hub.is_available()
             ):
                 continue
 
             edge_key = (hub_name, hub.name)
-            usage = self.edge_usage.get(edge_key, 0)
+            usage = self._edge_usage.get(edge_key, 0)
 
             zone_rank = {
                 ZoneType.priority: 0,
@@ -181,24 +181,19 @@ class Algorithm:
                 + (connection.current_drone / connection.max_link_capacity)
                 + (zone_rank * 0.05)
             )
-            candidates.append(
-                (
-                    (
-                        score,
-                        special_rank,
-                        usage,
-                        hub.current_drone,
-                        connection.current_drone,
-                        hub.name,
-                    ),
-                    hub,
-                )
+            candidate_key = (
+                score,
+                special_rank,
+                usage,
+                hub.current_drone,
+                connection.current_drone,
+                hub.name,
             )
+            if best_key is None or candidate_key < best_key:
+                best_key = candidate_key
+                best_hub = hub
 
-        if not candidates:
-            return None
-
-        return sorted(candidates)[0][1]
+        return best_hub
 
     def get_hub_by_pos(self, pos: tuple[int, int]) -> Hub | None:
         """
@@ -209,14 +204,125 @@ class Algorithm:
         Returns:
             Hub: The Hub in the position or None.
         """
-        for _, hub in self.drone_network.hubs.items():
-            if hub.get_position == pos:
-                return hub
-        return None
+        return self._hub_by_position.get(pos)
 
-    def move_drone(
-        self, drone: Drone, new_hub: Hub, old_hub: Hub
-    ) -> tuple[str, tuple[float, float]]:
+    def _move_in_connection(
+        self,
+        drones_snapshot: list[Drone],
+        end_position: tuple[int, int],
+        result: list[str],
+        moved_this_turn: set[int],
+    ) -> tuple[list[Drone], bool]:
+        """
+        Move drone that is in connection.
+
+        Args:
+            drones_snapshot (list[Drone]): list of drone to move.
+            end_position (tuple[int, int]): Position of the end_hub.
+            turn (int): The current turn.
+            result (list[str]): The result to print.
+            moved_this_turn (set[int]): Every drone that moved in the turn.
+        Returns:
+            tuple: The list of drone to remove and bool to see if it should
+            stop or not.
+        """
+        drones_to_remove: list[Drone] = []
+
+        for drone in drones_snapshot:
+            if not drone.is_in_connection:
+                continue
+
+            if drone.get_position == end_position:
+                drones_to_remove.append(drone)
+                continue
+
+            current_hub = self.get_hub_by_pos(drone.get_position)
+            if not current_hub:
+                raise ValueError(f"Invalid position {drone.get_position}")
+
+            if not drone.target_hub:
+                return drones_to_remove, True
+
+            move = self._move_drone(drone, drone.target_hub, current_hub)
+            if move:
+                result.append(move)
+                moved_this_turn.add(drone.id)
+
+        return drones_to_remove, False
+
+    def _move_waiting(
+        self,
+        drones_snapshot: list[Drone],
+        end_position: tuple[int, int],
+        result: list[str],
+        moved_this_turn: set[int],
+        drones_to_remove: list[Drone],
+    ) -> bool:
+        """
+        Move drone that isn't in a Connection.
+
+        Args:
+            drones_snapshot (list[Drone]): list of drone to move.
+            end_position (tuple[int, int]): Position of the end_hub.
+            turn (int): The current turn.
+            result (list[str]): The result to print.
+            moved_this_turn (set[int]): Every drone that moved in the turn.
+            drones_to_remove (list[Drone]): list of drone to remove.
+        Returns:
+            bool: Description of return value.
+        """
+        has_in_connection = False
+        for drone in drones_snapshot:
+            if drone.id in moved_this_turn or drone.is_in_connection:
+                continue
+
+            if drone.get_position == end_position:
+                drones_to_remove.append(drone)
+                continue
+
+            current_hub = self.get_hub_by_pos(drone.get_position)
+            if not current_hub:
+                raise ValueError("Position not matching")
+
+            closest_neighbor = self._get_closest_neighbor(current_hub.name)
+            if not closest_neighbor:
+                continue
+
+            move = self._move_drone(drone, closest_neighbor, current_hub)
+            if move:
+                result.append(move)
+                moved_this_turn.add(drone.id)
+
+                edge_key = (current_hub.name, closest_neighbor.name)
+                self._edge_usage[edge_key] = (
+                    self._edge_usage.get(edge_key, 0) + 1
+                )
+
+                if drone.is_in_connection:
+                    has_in_connection = True
+
+        return has_in_connection
+
+    def _remove_arrived_drones(self, drones_to_remove: list[Drone]) -> None:
+        """Remove all drones that reached destination in one pass."""
+        if not drones_to_remove:
+            return
+
+        drones_to_remove_ids = {drone.id for drone in drones_to_remove}
+        self._drones = [
+            drone
+            for drone in self._drones
+            if drone.id not in drones_to_remove_ids
+        ]
+
+    def _record_turn_positions(self) -> None:
+        """Store current drones positions for rendering."""
+        turn_positions = {
+            drone.id: drone.get_position for drone in self._drones
+        }
+        self._drone_positions_per_turn.append(turn_positions)
+
+    def _move_drone(self, drone: Drone, new_hub: Hub, old_hub: Hub) -> str:
         """
         Move a drone to a specific hub | connection.
 
@@ -229,17 +335,17 @@ class Algorithm:
         if not drone.is_in_connection:
             # Check if it the zone is restricted
             if new_hub.metadata.zone == ZoneType.restricted:
-                connection = self.drone_network.get_connection_between(
+                connection = self._drone_network.get_connection_between(
                     new_hub.name, old_hub.name
                 )
                 if not connection or not connection.is_available():
-                    return "", (0, 0)
+                    return ""
 
                 if (
-                    new_hub.name != self.drone_network.end_hub
+                    new_hub.name != self._drone_network.end_hub
                     and not new_hub.is_available()
                 ):
-                    return "", (0, 0)
+                    return ""
 
                 old_hub.remove_drone()
                 new_hub.add_drone()
@@ -247,29 +353,20 @@ class Algorithm:
                 drone.target_connection = connection
                 drone.target_connection.add_drone()
                 drone.target_hub = new_hub
-                new_x, new_y = new_hub.get_position
-                old_x, old_y = old_hub.get_position
 
-                new_pos: tuple[float, float] = (
-                    (new_x + old_x) / 2,
-                    (new_y + old_y) / 2,
-                )
-                return (
-                    f"D{drone.id}-{old_hub.name}-{new_hub.name}",
-                    new_pos,
-                )
+                return f"D{drone.id}-{old_hub.name}-{new_hub.name}"
             else:
                 if (
-                    new_hub.name != self.drone_network.end_hub
+                    new_hub.name != self._drone_network.end_hub
                     and not new_hub.is_available()
                 ):
-                    return "", (0, 0)
+                    return ""
 
                 pos_x, pos_y = new_hub.get_position
                 drone.move(pos_x, pos_y)
                 old_hub.remove_drone()
                 new_hub.add_drone()
-                return f"D{drone.id}-{new_hub.name}", new_hub.get_position
+                return f"D{drone.id}-{new_hub.name}"
         else:
             drone.is_in_connection = False
             if drone.target_connection:
@@ -278,98 +375,53 @@ class Algorithm:
             drone.target_hub = None
             pos_x, pos_y = new_hub.get_position
             drone.move(pos_x, pos_y)
-            return f"D{drone.id}-{new_hub.name}", new_hub.get_position
+            return f"D{drone.id}-{new_hub.name}"
 
     def run(self) -> None:
         """Run the algorithm."""
-        end_position = self.drone_network.get_end_hub.get_position
+        end_position = self._drone_network.get_end_hub.get_position
 
         turn = 0
         while True:
+            # The result of every drone moving
             result: list[str] = []
-            drones_to_remove: list[Drone] = []
-            drones_snapshot: list[Drone] = list(self.drones)
+
+            # Copy of the list of drone.
+            drones_snapshot: list[Drone] = self._drones.copy()
+
+            # To store who move in the turn to avoid moving twice
             moved_this_turn: set[int] = set()
-            for drone in drones_snapshot:
-                if not drone.is_in_connection:
-                    continue
 
-                if drone.get_position == end_position:
-                    drones_to_remove.append(drone)
-                    continue
+            to_remove, can_stop = self._move_in_connection(
+                drones_snapshot,
+                end_position,
+                result,
+                moved_this_turn,
+            )
+            if can_stop:
+                return
 
-                current_hub = self.get_hub_by_pos(drone.get_position)
-                if not current_hub:
-                    raise ValueError("Position not matching")
+            in_connection = self._move_waiting(
+                drones_snapshot,
+                end_position,
+                result,
+                moved_this_turn,
+                to_remove,
+            )
 
-                if not drone.target_hub:
-                    return
-
-                move, position = self.move_drone(
-                    drone, drone.target_hub, current_hub
-                )
-                if move:
-                    result.append(move)
-                    self.result.append((turn, position))
-                    moved_this_turn.add(drone.id)
-
-            # Then move new drones if possible
-            for drone in drones_snapshot:
-                if drone.id in moved_this_turn:
-                    continue
-                if drone.is_in_connection:
-                    continue
-
-                # If the drone reaches the end
-                if drone.get_position == end_position:
-                    drones_to_remove.append(drone)
-                    continue
-
-                # Get the current Hub
-                current_hub = self.get_hub_by_pos(drone.get_position)
-                if not current_hub:
-                    raise ValueError("Position not matching")
-
-                # Get the closest neighbor
-                closest_neighbor = self.get_closest_neighbor(current_hub.name)
-                if not closest_neighbor:
-                    continue
-
-                move, position = self.move_drone(
-                    drone, closest_neighbor, current_hub
-                )
-                if move:
-                    result.append(move)
-                    self.result.append((turn, position))
-
-                    moved_this_turn.add(drone.id)
-                    edge_key = (current_hub.name, closest_neighbor.name)
-                    self.edge_usage[edge_key] = (
-                        self.edge_usage.get(edge_key, 0) + 1
-                    )
-
-            # Remove drone that reach the end
-            for drone in drones_to_remove:
-                if drone in self.drones:
-                    self.drones.remove(drone)
+            self._remove_arrived_drones(to_remove)
 
             # If there are no drones left, we stop
-            if not self.drones:
+            if not self._drones:
                 print(f"\nTotal Turn: {turn}")
                 return
 
-            # If nothing moved and nobody is in transit, the network is stuck
-            if not result and not any(
-                drone.is_in_connection for drone in self.drones
-            ):
+            # If nothing moved and nobody is in transit
+            if not result and not in_connection:
                 print(f"\nTotal Turn: {turn}")
                 return
 
-            # Record positions of all drones for this turn
-            turn_positions: dict[int, tuple[int, int]] = {}
-            for drone in self.drones:
-                turn_positions[drone.id] = drone.get_position
-            self.drone_positions_per_turn.append(turn_positions)
+            self._record_turn_positions()
 
             turn += 1
 
@@ -382,4 +434,4 @@ class Algorithm:
         Returns:
             list[list[tuple[int, int]]]: The path of every drone.
         """
-        return self.drone_positions_per_turn
+        return self._drone_positions_per_turn
