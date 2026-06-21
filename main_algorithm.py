@@ -6,11 +6,16 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:24 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 14:33:33 by nyramana        ###   ########.fr        #
+#    Updated: 2026/03/13 20:33:58 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Class that store the reverse dijkstra class."""
+"""
+Main algorithm module, It contains everything to run the algroritm.
+
+This module contains the ReverseDijkstra and Algorithm class that solve
+every map.
+"""
 
 import heapq
 
@@ -18,7 +23,16 @@ from main_model import DroneNetwork, ZoneType, Drone, Hub
 
 
 class ReverseDijkstra:
-    """Class that store the reverse dijkstra algorithm."""
+    """
+    This class contains the ReverseDijkstra algorithm.
+
+    ReverseDijkstra algorithm is an alternative of the original
+    Dijkstra but used specially to check the closest path from every
+    single zone to it's destination. It is made so that we don't need
+    to recalculate every single zone for each drone but we just check
+    it's value and compare with another zone to see which zone is the
+    best.
+    """
 
     @staticmethod
     def calculate_heuristic(
@@ -71,7 +85,16 @@ class ReverseDijkstra:
 
 
 class Algorithm:
-    """Main class for the algorithm."""
+    """
+    Main class for the algorithm.
+
+    This algorithm has no real name but act like the A* method.
+    It uses the heuristic value made with the ReverseDijkstra algorithm
+    and compare every single neighbor using a specific value like the
+    heuristic, then the zonetype, then the zone capacity and so one.
+    I made it like that so that every drone don't go to a specific but
+    traverse other zone that has the same value but not visited often.
+    """
 
     def __init__(self, drone_network: DroneNetwork) -> None:
         """

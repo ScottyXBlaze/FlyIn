@@ -1,12 +1,12 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    rendering_utils.py                                :+:      :+:    :+:    #
+#    main_rendering_utils.py                           :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:47 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 14:17:59 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 20:50:38 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -17,6 +17,8 @@ from abc import ABC, abstractmethod
 
 
 class GlobalParameters:
+    """Global variables for the rendering program."""
+
     WINDOWWIDTH, WINDOWHEIGHT = 1400, 800
     CELL_SIZE = 50
     OFFSET = (20, 20)

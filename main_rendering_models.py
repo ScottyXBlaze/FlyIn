@@ -6,13 +6,12 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:40 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 15:24:22 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 20:47:01 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
 """Module that contain the class to easily have a camera."""
 
-import os
 import random
 import sys
 from typing import Any, override

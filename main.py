@@ -6,23 +6,25 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 14:31:46 by nyramana        ###   ########.fr        #
+#    Updated: 2026/03/13 20:22:53 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Main file."""
+"""
+Main Entry point for the program.
+
+It contains the class that combine everything
+from parsing and algorithm to rendering.
+"""
 
 import importlib
 import sys
 
-from main_algorithm import Algorithm
-from main_parsers import Parsers
-from main_rendering import StateManager
-
 
 def print_error() -> None:
     """Print an error and usage message."""
-    print("""
+    print(
+        """
 
 ==== Usage ====
 
@@ -32,7 +34,8 @@ uv run python3 main.py <mapfile>
 [Using the Makefile]
 make run MAP=<mapfile>
 
-""")
+"""
+    )
 
 
 def check_dependencies() -> bool:
@@ -60,9 +63,18 @@ if not check_dependencies():
     print_error()
     sys.exit(1)
 
+from main_algorithm import Algorithm  # noqa: 402
+from main_parsers import Parsers  # noqa: 402
+from main_rendering import StateManager  # noqa: 402
+
 
 class Main:
-    """Main Class."""
+    """
+    Main Entry class for the program.
+
+    Every initialization starts here and
+    the basic structure of the project.
+    """
 
     def __init__(self) -> None:
         """Everything starts here."""
@@ -71,7 +83,7 @@ class Main:
         self.check_args()
 
     def check_args(self) -> None:
-        """Check the argument of the program."""
+        """Check if the argument of the program is valid."""
         for arg in sys.argv[1:]:
             if arg == "--visual":
                 self.visual = True

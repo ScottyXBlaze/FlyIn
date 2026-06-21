@@ -1,23 +1,34 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    parsers.py                                        :+:      :+:    :+:    #
+#    main_parsers.py                                   :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:11 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 10:35:44 by nyramana        ###   ########.fr        #
+#    Updated: 2026/03/13 20:42:32 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Module that contain the parser of the program."""
+"""
+Module that contain the parser of the program.
+
+This module stores everything that is used to transform raw data into a
+structured variables and class.
+"""
 
 from typing import Any
 from main_model import Connection, DroneNetwork, Hub
 
 
 class Parsers:
-    """Parsers class."""
+    """
+    Parsers class.
+
+    This class don't use any complex method like the regex but use some
+    simple string manipulation to manage data and store them using the
+    model in the main_model.py.
+    """
 
     def __init__(self, path: str) -> None:
         """

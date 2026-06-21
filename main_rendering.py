@@ -6,9 +6,17 @@
 #    By: nyramana <nyramana@student.42antananari>  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/19 14:14:47 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 16:06:10 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 20:49:16 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
+
+"""
+Module that contain the main renering system.
+
+The rendering system uses the popular pygame library to manage window and
+manipulating them. It also uses various sprites and soung to make the program
+more immersive and not boring with some button so that it is more intuitive.
+"""
 
 import random
 import sys

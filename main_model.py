@@ -6,12 +6,19 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:54:00 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 10:38:59 by nyramana        ###   ########.fr        #
+#    Updated: 2026/03/13 20:38:36 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-"""Module that contain every model for the program."""
+"""
+This module stores every main model for the program.
 
+Every important object is represented as a class to make their usage much
+easier and faster with a cost of some performance. An example of class is
+the Drone that contain the basic position of a drone, Connection class that
+contain the name of the two hub and his metadata, or the DroneNetwork that
+contains everything from the nb of drone to every Hub and Connection.
+"""
 from enum import Enum
 from typing import Self
 
@@ -132,7 +139,11 @@ class Connection(BaseModel):
 
 
 class DroneNetwork(BaseModel):
-    """DroneNetwork Class."""
+    """
+    DroneNetwork Class.
+
+    It contains every important data of the program.
+    """
 
     nb_drones: int = Field(gt=0, le=10000)
     start_hub: str = Field(default="")
