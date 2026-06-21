@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/21 21:54:33 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/21 18:43:04 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -26,16 +26,13 @@ def print_error() -> None:
     """Print an error and usage message."""
     print(
         """
-
 ==== Usage ====
 
 [Using the python file]
 uv run python3 main.py <mapfile>
 
 [Using the Makefile]
-make run MAP=<mapfile>
-
-"""
+make run MAP=<mapfile>"""
     )
 
 
@@ -53,17 +50,19 @@ def check_dependencies() -> bool:
         "pygame",
         "pydantic",
     }
+    missing = set()
     for dependency in dependencies:
         try:
             _ = importlib.import_module(dependency)
         except ImportError:
-            print("Hello", dependency)
-            return False
+            missing.add(dependency)
+    if missing:
+        print(f"Missing dependency: {", ".join(missing)}")
+        return False
     return True
 
 
 if not check_dependencies():
-    print("[Error] Missing dependencies")
     print_error()
     sys.exit(1)
 
