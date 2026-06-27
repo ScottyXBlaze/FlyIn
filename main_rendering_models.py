@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:40 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/21 18:37:11 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/24 15:48:23 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -306,6 +306,7 @@ class InfoSprite(pygame.sprite.Sprite):
             f"Current Drone: {real_hub.current_drone}",
             f"Total drone: {self._drone_network.nb_drones}",
             f"Connected to: {connections}",
+            f"H value: {self._heuristic_value.get(real_hub.name)}"
         ]
 
         text_surfaces = [
