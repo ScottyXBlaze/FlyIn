@@ -1,12 +1,12 @@
 # *************************************************************************** #
 #                                                                             #
 #                                                        :::      ::::::::    #
-#    rendering_utils.py                                :+:      :+:    :+:    #
+#    utils.py                                          :+:      :+:    :+:    #
 #                                                    +:+ +:+         +:+      #
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:47 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 14:17:59 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 11:51:48 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,12 +14,16 @@
 
 import pygame
 from abc import ABC, abstractmethod
+import os
 
 
 class GlobalParameters:
+    """Global variables for the rendering program."""
+
     WINDOWWIDTH, WINDOWHEIGHT = 1400, 800
     CELL_SIZE = 50
     OFFSET = (20, 20)
+    PATH = os.path.abspath(__file__)[: -len(os.path.basename(__file__))]
 
 
 class SpriteConverter:

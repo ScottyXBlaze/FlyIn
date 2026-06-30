@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 14:31:46 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 13:21:42 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,10 +14,6 @@
 
 import importlib
 import sys
-
-from main_algorithm import Algorithm
-from main_parsers import Parsers
-from main_rendering import StateManager
 
 
 def print_error() -> None:
@@ -59,6 +55,8 @@ if not check_dependencies():
     print("[Error] Missing dependencies")
     print_error()
     sys.exit(1)
+
+from src import Algorithm, Parsers, StateManager  # noqa
 
 
 class Main:
