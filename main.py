@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/30 17:34:04 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 17:39:26 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -14,6 +14,7 @@
 
 import importlib
 import sys
+import os
 
 
 def print_error() -> None:
@@ -31,29 +32,29 @@ make run MAP=<mapfile>
 """)
 
 
-def check_dependencies() -> bool:
-    """
-    Check every depedencies to run the program.
-
-    Returns:
-        bool: True if every dependencies is installed.
-    """
-    dependencies = {
-        "pygame",
-        "pydantic",
-    }
+def check_missing_dependency() -> None:
+    """Check the dependency so that the program run successfully."""
+    dependencies = {"pygame", "pydantic"}
+    missing = []
     for dependency in dependencies:
         try:
-            _ = importlib.import_module(dependency)
+            tmp = importlib.import_module(dependency)
+            if dependency == "pygame":
+                if not (hasattr(tmp, "IS_CE") and tmp.IS_CE):
+                    print("Pygame installed but not the CE one")
+                    missing.append(dependency)
         except ImportError:
-            return False
-    return True
+            missing.append(dependency)
+    if missing:
+        print(f"Missing dependecy: {", ".join(missing)}")
+        print_error()
+        sys.exit(1)
 
 
-if not check_dependencies():
-    print("[Error] Missing dependencies")
-    print_error()
-    sys.exit(1)
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
+
+check_missing_dependency()
+
 
 from src import Algorithm, Parsers, StateManager  # noqa
 
@@ -120,10 +121,6 @@ class Main:
 
 
 if __name__ == "__main__":
-
-    if not check_dependencies():
-        print("[Error] Missing dependencies")
-
     main = Main()
     try:
         main.run()
