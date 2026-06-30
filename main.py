@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/27 11:37:35 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 14:04:58 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -24,47 +24,34 @@ import sys
 
 def print_error() -> None:
     """Print an error and usage message."""
-    print(
-        """
+    print("""
 ==== Usage ====
 
 [Using the python file]
 uv run python3 main.py <mapfile>
 
 [Using the Makefile]
-make run MAP=<mapfile>"""
-    )
+make run MAP=<mapfile>""")
+
+
+def check_missing_dependency() -> None:
+    """Check the dependency so that the program run successfully."""
+    dependencies = {"pygame", "pydantic"}
+    missing = []
+    for dependency in dependencies:
+        try:
+            importlib.import_module(dependency)
+        except ImportError:
+            missing.append(dependency)
+    if missing:
+        print(f"Missing dependecy: {", ".join(missing)}")
+        sys.exit(1)
 
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
+check_missing_dependency()
 
-def check_dependencies() -> bool:
-    """
-    Check every depedencies to run the program.
-
-    Returns:
-        bool: True if every dependencies is installed.
-    """
-    dependencies = {
-        "pygame",
-        "pydantic",
-    }
-    missing = set()
-    for dependency in dependencies:
-        try:
-            _ = importlib.import_module(dependency)
-        except ImportError:
-            missing.add(dependency)
-    if missing:
-        print(f"Missing dependency: {", ".join(missing)}")
-        return False
-    return True
-
-
-if not check_dependencies():
-    print_error()
-    sys.exit(1)
 
 from main_algorithm import Algorithm  # noqa: 402
 from main_parsers import Parsers  # noqa: 402
@@ -95,11 +82,11 @@ class Main:
             else:
                 print("[Error] Too much arguments")
                 print_error()
-                sys.exit(1)
+                sys.exit()
         if self._path == "":
             print("[Error] No enough arguments")
             print_error()
-            sys.exit(1)
+            sys.exit()
         print()
 
     def run(self) -> None:

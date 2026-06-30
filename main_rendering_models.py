@@ -306,7 +306,7 @@ class InfoSprite(pygame.sprite.Sprite):
             f"Current Drone: {real_hub.current_drone}",
             f"Total drone: {self._drone_network.nb_drones}",
             f"Connected to: {connections}",
-            f"H value: {self._heuristic_value.get(real_hub.name)}"
+            f"H value: {self._heuristic_value.get(real_hub.name)}",
         ]
 
         text_surfaces = [
