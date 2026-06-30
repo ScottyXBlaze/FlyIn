@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/30 14:04:58 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 17:37:20 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -40,11 +40,16 @@ def check_missing_dependency() -> None:
     missing = []
     for dependency in dependencies:
         try:
-            importlib.import_module(dependency)
+            tmp = importlib.import_module(dependency)
+            if dependency == "pygame":
+                if not (hasattr(tmp, "IS_CE") and tmp.IS_CE):
+                    print("Pygame installed but not the CE one")
+                    missing.append(dependency)
         except ImportError:
             missing.append(dependency)
     if missing:
         print(f"Missing dependecy: {", ".join(missing)}")
+        print_error()
         sys.exit(1)
 
 
