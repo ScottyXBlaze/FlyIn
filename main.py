@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/30 17:39:26 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 17:59:33 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -56,7 +56,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 check_missing_dependency()
 
 
-from src import Algorithm, Parsers, StateManager  # noqa
+from src import Algorithm, Parsers, StateManager  # noqa: 402
 
 
 class Main:
