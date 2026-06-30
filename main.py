@@ -6,7 +6,7 @@
 #    By: nyramana <nyramana@student.42antananariv  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/07 19:53:26 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/30 13:21:42 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 17:34:04 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
@@ -46,7 +46,6 @@ def check_dependencies() -> bool:
         try:
             _ = importlib.import_module(dependency)
         except ImportError:
-            print("Hello", dependency)
             return False
     return True
 

@@ -6,11 +6,11 @@
 #    By: nyramana <nyramana@student.42antananari>  +#+  +:+       +#+         #
 #                                                +#+#+#+#+#+   +#+            #
 #    Created: 2026/06/19 14:22:31 by nyramana         #+#    #+#              #
-#    Updated: 2026/06/19 14:22:31 by nyramana        ###   ########.fr        #
+#    Updated: 2026/06/30 17:29:31 by nyramana        ###   ########.fr        #
 #                                                                             #
 # *************************************************************************** #
 
-UV := $(shell which uv)
+UV = $(shell which uv)
 
 install:
 	@$(UV) sync
